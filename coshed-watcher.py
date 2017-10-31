@@ -6,6 +6,7 @@ import subprocess
 import logging
 import argparse
 
+import coshed
 from coshed.coshed_config import CoshedConfig, COSH_FILE_DEFAULT
 
 logging.basicConfig(level=logging.DEBUG,
@@ -87,7 +88,8 @@ def watch(cosh_config_obj):
 
 
 if __name__ == '__main__':
-    argparser = argparse.ArgumentParser()
+    argparser = argparse.ArgumentParser(epilog="coshed {:s}".format(
+        coshed.__version__))
     argparser.add_argument(
         '--cosh-file', '-f',
         dest="coshfile", default=COSH_FILE_DEFAULT, metavar="PATH",
