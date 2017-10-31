@@ -7,3 +7,5 @@
 *.css.map
 /testsuite/cosh.json
 /cosh.json
+/dist
+/MANIFEST
