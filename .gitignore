@@ -1,0 +1,7 @@
+.DS_Store
+._*
+*.py[cod]
+/.idea
+*~
+.sass-cache/
+*.css.map
