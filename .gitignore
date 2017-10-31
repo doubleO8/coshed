@@ -5,3 +5,5 @@
 *~
 .sass-cache/
 *.css.map
+/testsuite/cosh.json
+/cosh.json
