@@ -5,6 +5,7 @@ import sys
 import subprocess
 import logging
 import argparse
+import glob
 
 import coshed
 from coshed.coshed_config import CoshedConfig, COSH_FILE_DEFAULT
@@ -18,6 +19,7 @@ LOG = logging.getLogger("coshed_watcher")
 PROJECT_ROOT = os.getcwd()
 
 SCSS_ROOT = os.path.join(PROJECT_ROOT, 'scss')
+SCRIPTS_D_ROOT = os.path.join(PROJECT_ROOT, 'contrib/cosh_scripts.d')
 
 ENV_MAP = [
     ("COSH_SCSS", "scss"),
@@ -40,7 +42,8 @@ DEFAULTS = dict(
     inotifywait="inotifywait",
     scss="scss",
     #: functions to be called when a change in *watched_root* is detected
-    onchange=["call_scss"]
+    onchange=["call_scss", 'call_scripts'],
+    scripts_d=SCRIPTS_D_ROOT
 )
 
 
@@ -56,6 +59,25 @@ def call_scss(cosh_config_obj):
         LOG.info(" {!s}".format(scss_call))
         scss_rc = subprocess.call(scss_call, shell=True)
         LOG.info("# RC={!s}".format(scss_rc))
+
+def call_scripts(cosh_config_obj):
+    try:
+        cosh_config_obj.scripts_d
+    except AttributeError:
+        LOG.debug("no scripts_d attribute")
+        return
+    glob_scripts = u'{:s}/*'.format(cosh_config_obj.scripts_d)
+
+    for s_filename in glob.glob(glob_scripts):
+        if s_filename.endswith("~"):
+            continue
+        if not os.access(s_filename, os.X_OK):
+            continue
+        command = u'{s_filename} {coshfile}'.format(
+            s_filename=s_filename,coshfile=cosh_config_obj.coshfile)
+        LOG.info(" {!s}".format(command))
+        command_rc = subprocess.call(command, shell=True)
+        LOG.info("# RC={!s}".format(command_rc))
 
 
 def watch(cosh_config_obj):
