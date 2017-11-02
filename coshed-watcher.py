@@ -33,6 +33,9 @@ DEFAULTS = dict(
         "--unix-newlines",
         "--sourcemap=none"
     ],
+    inotifywait_args=[
+        "-r", "-e modify"
+    ],
     # root path being watched by inotifywait
     watched_root=SCSS_ROOT,
     #: source (SCSS) -> target (CSS) locations
@@ -93,8 +96,10 @@ def _onchange(cosh_config_obj):
 def watch(cosh_config_obj):
     root = cosh_config_obj.watched_root
     LOG.debug("Watching {!s}".format(root))
-    inotifywait_call = "{binary} -r -e modify {folder}".format(
-        binary=cosh_config_obj.inotifywait, folder=root)
+    inotifywait_call = '{binary} {args} "{folder}"'.format(
+        binary=cosh_config_obj.inotifywait,
+        args=' '.join(cosh_config_obj.inotifywait_args),
+        folder=root)
 
     rc = subprocess.call(inotifywait_call, shell=True)
     while rc == 0:
