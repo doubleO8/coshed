@@ -7,6 +7,7 @@ import glob
 
 from coshed.coshed_concat import CoshedConcatMinifiedJS
 
+
 class CoshedWatcher(object):
     def __init__(self, cosh_cfg):
         self.cosh_config_obj = cosh_cfg
@@ -53,14 +54,15 @@ class CoshedWatcher(object):
             command_rc = subprocess.call(command, shell=True)
             self.log.info("# RC={!s}".format(command_rc))
 
-    def _onchange(self):
+    def on_change(self):
         for func_name in self.cosh_config_obj.onchange:
             # self.log.debug("About to call {:s}".format(func))
             try:
                 func = getattr(self, func_name)
                 func()
-            except KeyError:
-                self.log.warning("non-existing function {!r}. IGNORED.".format(func))
+            except AttributeError:
+                self.log.warning(
+                    "Missing method {!r}. IGNORED.".format(func_name))
 
     def watch(self):
         root = self.cosh_config_obj.watched_root
@@ -72,6 +74,5 @@ class CoshedWatcher(object):
 
         rc = subprocess.call(inotifywait_call, shell=True)
         while rc == 0:
-            self._onchange()
+            self.on_change()
             rc = subprocess.call(inotifywait_call, shell=True)
-

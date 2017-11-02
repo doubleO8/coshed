@@ -105,7 +105,7 @@ if __name__ == '__main__':
     cosh_op = CoshedWatcher(cosh_cfg)
 
     if args.force_update:
-        cosh_op._onchange()
+        cosh_op.on_change()
         sys.exit(0)
 
     try:
