@@ -105,10 +105,10 @@ if __name__ == '__main__':
     cosh_op = CoshedWatcher(cosh_cfg)
 
     if args.force_update:
-        cosh_op._onchange(cosh_cfg)
+        cosh_op._onchange()
         sys.exit(0)
 
     try:
-        cosh_op.watch(cosh_cfg)
+        cosh_op.watch()
     except KeyboardInterrupt:
         LOG.info("\nAborted.")
