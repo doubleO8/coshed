@@ -86,7 +86,8 @@ if __name__ == '__main__':
     LOG.warning(
         " 'apt-get install inotify-tools ruby-sass' on debian "
         "derived distributions")
-
+    LOG.waring("For JavaScript minification css-html-js-minify"
+               "needs to be installed.")
     for env_key, key in ENV_MAP:
         LOG.debug(
             "You may use environment variable {env_key!r} to "

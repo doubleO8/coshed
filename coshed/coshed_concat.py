@@ -8,6 +8,12 @@ import functools
 import shutil
 import subprocess
 
+#: call css-html-js-minify for creating <filename_trunk>.min.js
+CSS_HTML_JS_MINIFY_CALL = '{binary} "{filename}"'
+
+#: css-html-js-minify script path
+CSS_HTML_JS_MINIFY_BINARY = "css-html-js-minify.py"
+
 
 class CoshedConcat(object):
     def __init__(self, filenames, trunk_template, **kwargs):
@@ -87,12 +93,11 @@ class CoshedConcatMinifiedJS(CoshedConcat):
         >>> ccm.hexdigest
         '45ddc7106b8125a4549590566570119675f6c8cd54ae03369b8c6e74e4e6c6cb'
         """
-        CMD_FMT = '{binary} "{filename}"'
         out_filename = '{:s}.min.{:s}'.format(self.uuid_value, self.ext)
         out_target = os.path.join(self.tmp, out_filename)
 
-        minime = CMD_FMT.format(binary="css-html-js-minify.py",
-                                filename=self.tmp_target)
+        minime = CSS_HTML_JS_MINIFY_CALL.format(
+            binary=CSS_HTML_JS_MINIFY_BINARY, filename=self.tmp_target)
         rc = subprocess.call(minime, shell=True)
         self.tmp_target = out_target
         return rc
