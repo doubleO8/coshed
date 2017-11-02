@@ -21,11 +21,13 @@ PROJECT_ROOT = os.getcwd()
 SCSS_ROOT = os.path.join(PROJECT_ROOT, 'scss')
 SCRIPTS_D_ROOT = os.path.join(PROJECT_ROOT, 'contrib/cosh_scripts.d')
 
+#: default environment key to configuration key mappings
 ENV_MAP = [
     ("COSH_SCSS", "scss"),
     ("COSH_INOTIFYWAIT", 'inotifywait'),
 ]
 
+#: default configuration values
 DEFAULTS = dict(
     #: default scss arguments
     scss_args=[
@@ -33,19 +35,23 @@ DEFAULTS = dict(
         "--unix-newlines",
         "--sourcemap=none"
     ],
+    #: default inotifywait arguments
     inotifywait_args=[
         "-r", "-e modify"
     ],
-    # root path being watched by inotifywait
+    #: root path being watched by inotifywait
     watched_root=SCSS_ROOT,
-    #: source (SCSS) -> target (CSS) locations
+    #: list of tuples: source (SCSS) -> target (CSS) locations
     scss_map=[
+        # ('x.scss', 'y.css'),
     ],
     #: default locations of used binaries
     inotifywait="inotifywait",
     scss="scss",
     #: functions to be called when a change in *watched_root* is detected
     onchange=["call_scss", 'call_scripts'],
+    #: path where scripts are located which shall be called on changes to
+    #: *watched_root*
     scripts_d=SCRIPTS_D_ROOT
 )
 
