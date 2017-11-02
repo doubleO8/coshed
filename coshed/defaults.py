@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import os
 
+COSH_FILE_DEFAULT = 'cosh.json'
+
 PROJECT_ROOT = os.getcwd()
 
 SCSS_ROOT = os.path.join(PROJECT_ROOT, 'scss')

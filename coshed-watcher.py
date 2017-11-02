@@ -6,9 +6,11 @@ import logging
 import argparse
 
 import coshed
-from coshed.coshed_config import CoshedConfig, COSH_FILE_DEFAULT
-from coshed.coshed_watcher import CoshedWatcher
+from coshed.defaults import COSH_FILE_DEFAULT
 from coshed.defaults import COSHED_CONFIG_DEFAULTS, ENV_MAP
+from coshed.coshed_config import CoshedConfig
+from coshed.coshed_watcher import CoshedWatcher
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
