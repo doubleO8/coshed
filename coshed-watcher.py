@@ -17,9 +17,7 @@ LOG = logging.getLogger("coshed_watcher")
 
 PROJECT_ROOT = os.getcwd()
 
-SCSS_ROOT = os.path.join(PROJECT_ROOT, 'sourcefiles/scss')
-
-CSS_ROOT = os.path.join(PROJECT_ROOT, 'plugin/public/css')
+SCSS_ROOT = os.path.join(PROJECT_ROOT, 'scss')
 
 ENV_MAP = [
     ("COSH_SCSS", "scss"),
@@ -37,18 +35,6 @@ DEFAULTS = dict(
     watched_root=SCSS_ROOT,
     #: source (SCSS) -> target (CSS) locations
     scss_map=[
-        (
-            os.path.join(SCSS_ROOT, "style.scss"),
-            os.path.join(CSS_ROOT, "style.min.css")
-        ),
-        (
-            os.path.join(SCSS_ROOT, "theme/original.scss"),
-            os.path.join(CSS_ROOT, "theme_original.css")
-        ),
-        (
-            os.path.join(SCSS_ROOT, "theme/original-small-screen.scss"),
-            os.path.join(CSS_ROOT, "../themes/original-small-screen.css")
-        ),
     ],
     #: default locations of used binaries
     inotifywait="inotifywait",
@@ -59,6 +45,9 @@ DEFAULTS = dict(
 
 
 def call_scss(cosh_config_obj):
+    if not cosh_config_obj.scss_map:
+        LOG.debug("Empty scss_map!")
+
     for (src, dst) in cosh_config_obj.scss_map:
         scss_call = '{binary} {args} "{src}":"{dst}"'.format(
             binary=cosh_config_obj.scss,
