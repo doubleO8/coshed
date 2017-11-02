@@ -153,6 +153,11 @@ class CoshedConfig(object):
             if self._acceptable_attr_name(attr_name):
                 yield attr_name
 
+    def kv_pairs(self):
+        for key in self.keys():
+            value = getattr(self, key)
+            yield key, value
+
     def __str__(self):
         items = list()
         for attr_name in self.keys():
@@ -162,3 +167,10 @@ class CoshedConfig(object):
 
     def __repr__(self):
         return repr(self._data_dict())
+
+class CoshedConfigReadOnly(CoshedConfig):
+    def __init__(self, coshfile):
+        CoshedConfig.__init__(self, ro=True, coshfile=coshfile)
+
+    def write(self, *args, **kwargs):
+        return False
