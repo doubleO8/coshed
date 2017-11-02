@@ -60,6 +60,7 @@ def call_scss(cosh_config_obj):
         scss_rc = subprocess.call(scss_call, shell=True)
         LOG.info("# RC={!s}".format(scss_rc))
 
+
 def call_scripts(cosh_config_obj):
     try:
         cosh_config_obj.scripts_d
@@ -74,10 +75,19 @@ def call_scripts(cosh_config_obj):
         if not os.access(s_filename, os.X_OK):
             continue
         command = u'{s_filename} {coshfile}'.format(
-            s_filename=s_filename,coshfile=cosh_config_obj.coshfile)
+            s_filename=s_filename, coshfile=cosh_config_obj.coshfile)
         LOG.info(" {!s}".format(command))
         command_rc = subprocess.call(command, shell=True)
         LOG.info("# RC={!s}".format(command_rc))
+
+
+def _onchange(cosh_config_obj):
+    for func in cosh_config_obj.onchange:
+        # LOG.debug("About to call {:s}".format(func))
+        try:
+            globals()[func](cosh_config_obj)
+        except KeyError:
+            LOG.warning("non-existing function {!r}. IGNORED.".format(func))
 
 
 def watch(cosh_config_obj):
@@ -88,13 +98,7 @@ def watch(cosh_config_obj):
 
     rc = subprocess.call(inotifywait_call, shell=True)
     while rc == 0:
-        for func in cosh_config_obj.onchange:
-            LOG.info("About to run: {:s}".format(func))
-            try:
-                globals()[func](cosh_config_obj)
-            except KeyError:
-                LOG.warning("non-existing function..")
-
+        _onchange(cosh_config_obj)
         rc = subprocess.call(inotifywait_call, shell=True)
 
 
@@ -130,7 +134,7 @@ if __name__ == '__main__':
     for env_key, key in ENV_MAP:
         LOG.debug(
             "You may use environment variable {env_key!r} to "
-            "override used binary {key!r}.".format(
+            "override configuration key {key!r}.".format(
                 env_key=env_key, key=key))
 
     if args.verbose > 0:
@@ -143,7 +147,7 @@ if __name__ == '__main__':
         LOG.info(cosh_cfg)
 
     if args.force_update:
-        call_scss(cosh_cfg)
+        _onchange(cosh_cfg)
         sys.exit(0)
 
     try:
