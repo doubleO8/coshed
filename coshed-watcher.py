@@ -9,6 +9,7 @@ import glob
 
 import coshed
 from coshed.coshed_config import CoshedConfig, COSH_FILE_DEFAULT
+from coshed.coshed_concat import CoshedConcatMinifiedJS
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -19,6 +20,7 @@ LOG = logging.getLogger("coshed_watcher")
 PROJECT_ROOT = os.getcwd()
 
 SCSS_ROOT = os.path.join(PROJECT_ROOT, 'scss')
+JS_ROOT = os.path.join(PROJECT_ROOT, 'js')
 SCRIPTS_D_ROOT = os.path.join(PROJECT_ROOT, 'contrib/cosh_scripts.d')
 
 #: default environment key to configuration key mappings
@@ -45,11 +47,14 @@ DEFAULTS = dict(
     scss_map=[
         # ('x.scss', 'y.css'),
     ],
+    #: list of paths: Javascript files to concatenate
+    concat_js_sources=[],
+    concat_js_trunk=os.path.join(JS_ROOT, 'lib.bundle.js'),
     #: default locations of used binaries
     inotifywait="inotifywait",
     scss="scss",
     #: functions to be called when a change in *watched_root* is detected
-    onchange=["call_scss", 'call_scripts'],
+    onchange=["call_scss", 'call_js', 'call_scripts'],
     #: path where scripts are located which shall be called on changes to
     #: *watched_root*
     scripts_d=SCRIPTS_D_ROOT
@@ -68,6 +73,16 @@ def call_scss(cosh_config_obj):
         LOG.info(" {!s}".format(scss_call))
         scss_rc = subprocess.call(scss_call, shell=True)
         LOG.info("# RC={!s}".format(scss_rc))
+
+
+def call_js(cosh_config_obj):
+    if not cosh_config_obj.concat_js_sources:
+        LOG.debug("Empty concat_js_sources!")
+    cat = CoshedConcatMinifiedJS(
+        cosh_config_obj.concat_js_sources,
+        cosh_config_obj.concat_js_trunk
+    )
+    cat.write()
 
 
 def call_scripts(cosh_config_obj):

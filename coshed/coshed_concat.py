@@ -6,6 +6,8 @@ import tempfile
 import hashlib
 import functools
 import shutil
+import subprocess
+
 
 class CoshedConcat(object):
     def __init__(self, filenames, trunk_template, **kwargs):
@@ -25,11 +27,17 @@ class CoshedConcat(object):
         with open(self.tmp_target, "wb") as tgt:
             for filename in self.sources:
                 with open(filename, "rb") as src:
-                    for chunk in iter(functools.partial(src.read, 4096)):
+                    for chunk in iter(functools.partial(src.read, 4096), ''):
                         tgt.write(chunk)
 
-    def _minify(self):
-        pass
+    def _mangle(self):
+        raise NotImplementedError
+
+    def mangle(self):
+        try:
+            self._mangle()
+        except NotImplementedError:
+            pass
 
     def get_target_filename(self):
         """
@@ -54,12 +62,40 @@ class CoshedConcat(object):
 
     def write(self):
         self._concat()
-        self._minify()
+        self.mangle()
         hasher = hashlib.new("sha256")
         with open(self.tmp_target, "rb") as src:
-            for chunk in iter(functools.partial(src.read, 4096)):
+            for chunk in iter(functools.partial(src.read, 4096), ''):
                 hasher.update(chunk)
         self.hexdigest = hasher.hexdigest()
+        target = os.path.join(self.target_folder, self.filename)
+        shutil.copy(self.tmp_target, target)
+        return os.path.abspath(target)
+
+
+class CoshedConcatMinifiedJS(CoshedConcat):
+    def _mangle(self):
+        """
+
+        Returns:
+
+        >>> a = os.path.abspath(os.path.join(os.path.dirname(__file__), '../contrib/html_example/js/eins.js'))
+        >>> b = os.path.abspath(os.path.join(os.path.dirname(__file__), '../contrib/html_example/js/two.js'))
+        >>> ccm = CoshedConcatMinifiedJS([a, b], "/tmp/concat.js")
+        >>> ccm.write()
+        '/tmp/concat.45ddc7106b8125a4549590566570119675f6c8cd54ae03369b8c6e74e4e6c6cb.js'
+        >>> ccm.hexdigest
+        '45ddc7106b8125a4549590566570119675f6c8cd54ae03369b8c6e74e4e6c6cb'
+        """
+        CMD_FMT = '{binary} "{filename}"'
+        out_filename = '{:s}.min.{:s}'.format(self.uuid_value, self.ext)
+        out_target = os.path.join(self.tmp, out_filename)
+
+        minime = CMD_FMT.format(binary="css-html-js-minify.py",
+                                filename=self.tmp_target)
+        rc = subprocess.call(minime, shell=True)
+        self.tmp_target = out_target
+        return rc
 
 
 if __name__ == '__main__':
