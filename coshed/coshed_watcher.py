@@ -31,7 +31,8 @@ class CoshedWatcher(object):
             self.log.debug("Empty concat_js_sources!")
         cat = CoshedConcatMinifiedJS(
             self.cosh_config_obj.concat_js_sources,
-            self.cosh_config_obj.concat_js_trunk
+            self.cosh_config_obj.concat_js_trunk,
+            css_html_js_minify=self.cosh_config_obj.css_html_js_minify
         )
         cat.write()
 

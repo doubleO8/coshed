@@ -7,12 +7,12 @@ import hashlib
 import functools
 import shutil
 import subprocess
+import logging
+
+from defaults import CSS_HTML_JS_MINIFY_BINARY
 
 #: call css-html-js-minify for creating <filename_trunk>.min.js
 CSS_HTML_JS_MINIFY_CALL = '{binary} "{filename}"'
-
-#: css-html-js-minify script path
-CSS_HTML_JS_MINIFY_BINARY = "css-html-js-minify.py"
 
 
 class CoshedConcat(object):
@@ -27,14 +27,24 @@ class CoshedConcat(object):
         self.tmp_filename = '{:s}.{:s}'.format(self.uuid_value, self.ext)
         self.tmp_target = os.path.join(self.tmp, self.tmp_filename)
         self.hexdigest = '0' * 16
+        self.log = logging.getLogger(__name__)
 
     def _concat(self):
+        items = 0
         self.hexdigest = '0' * 16
+
+        if not self.sources:
+            self.log.warning("No sources, no gain.")
+            return 0
+
         with open(self.tmp_target, "wb") as tgt:
             for filename in self.sources:
                 with open(filename, "rb") as src:
+                    items += 1
                     for chunk in iter(functools.partial(src.read, 4096), ''):
                         tgt.write(chunk)
+
+        return items
 
     def _mangle(self):
         raise NotImplementedError
@@ -67,6 +77,10 @@ class CoshedConcat(object):
     filename = property(get_target_filename)
 
     def write(self):
+        if not self.sources:
+            self.log.warning("No sources, no gain.")
+            return None
+
         self._concat()
         self.mangle()
         hasher = hashlib.new("sha256")
@@ -75,11 +89,26 @@ class CoshedConcat(object):
                 hasher.update(chunk)
         self.hexdigest = hasher.hexdigest()
         target = os.path.join(self.target_folder, self.filename)
-        shutil.copy(self.tmp_target, target)
+
+        try:
+            shutil.copy(self.tmp_target, target)
+        except IOError:
+            self.log.info("Could not copy {!r} to {!r}".format(
+                self.tmp_target, target))
+            self.log.info("Trying to create {!r}".format(self.target_folder))
+            os.makedirs(self.target_folder)
+            shutil.copy(self.tmp_target, target)
+
         return os.path.abspath(target)
 
 
 class CoshedConcatMinifiedJS(CoshedConcat):
+    def __init__(self, filenames, trunk_template, **kwargs):
+        CoshedConcat.__init__(self, filenames, trunk_template, **kwargs)
+        self.log = logging.getLogger(__name__)
+        self.css_html_js_minify_binary = kwargs.get('css_html_js_minify',
+                                                    CSS_HTML_JS_MINIFY_BINARY)
+
     def _mangle(self):
         """
 
@@ -97,9 +126,12 @@ class CoshedConcatMinifiedJS(CoshedConcat):
         out_target = os.path.join(self.tmp, out_filename)
 
         minime = CSS_HTML_JS_MINIFY_CALL.format(
-            binary=CSS_HTML_JS_MINIFY_BINARY, filename=self.tmp_target)
+            binary=self.css_html_js_minify_binary, filename=self.tmp_target)
         rc = subprocess.call(minime, shell=True)
-        self.tmp_target = out_target
+
+        if os.path.exists(out_target):
+            self.tmp_target = out_target
+
         return rc
 
 
