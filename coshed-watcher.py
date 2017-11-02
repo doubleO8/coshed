@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import subprocess
 import logging
 import argparse
-import glob
 
 import coshed
 from coshed.coshed_config import CoshedConfig, COSH_FILE_DEFAULT
-from coshed.coshed_concat import CoshedConcatMinifiedJS
+from coshed.coshed_watcher import CoshedWatcher
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -60,74 +58,6 @@ DEFAULTS = dict(
     scripts_d=SCRIPTS_D_ROOT
 )
 
-
-def call_scss(cosh_config_obj):
-    if not cosh_config_obj.scss_map:
-        LOG.debug("Empty scss_map!")
-
-    for (src, dst) in cosh_config_obj.scss_map:
-        scss_call = '{binary} {args} "{src}":"{dst}"'.format(
-            binary=cosh_config_obj.scss,
-            args=' '.join(cosh_config_obj.scss_args),
-            src=src, dst=dst)
-        LOG.info(" {!s}".format(scss_call))
-        scss_rc = subprocess.call(scss_call, shell=True)
-        LOG.info("# RC={!s}".format(scss_rc))
-
-
-def call_js(cosh_config_obj):
-    if not cosh_config_obj.concat_js_sources:
-        LOG.debug("Empty concat_js_sources!")
-    cat = CoshedConcatMinifiedJS(
-        cosh_config_obj.concat_js_sources,
-        cosh_config_obj.concat_js_trunk
-    )
-    cat.write()
-
-
-def call_scripts(cosh_config_obj):
-    try:
-        cosh_config_obj.scripts_d
-    except AttributeError:
-        LOG.debug("no scripts_d attribute")
-        return
-    glob_scripts = u'{:s}/*'.format(cosh_config_obj.scripts_d)
-
-    for s_filename in glob.glob(glob_scripts):
-        if s_filename.endswith("~"):
-            continue
-        if not os.access(s_filename, os.X_OK):
-            continue
-        command = u'{s_filename} {coshfile}'.format(
-            s_filename=s_filename, coshfile=cosh_config_obj.coshfile)
-        LOG.info(" {!s}".format(command))
-        command_rc = subprocess.call(command, shell=True)
-        LOG.info("# RC={!s}".format(command_rc))
-
-
-def _onchange(cosh_config_obj):
-    for func in cosh_config_obj.onchange:
-        # LOG.debug("About to call {:s}".format(func))
-        try:
-            globals()[func](cosh_config_obj)
-        except KeyError:
-            LOG.warning("non-existing function {!r}. IGNORED.".format(func))
-
-
-def watch(cosh_config_obj):
-    root = cosh_config_obj.watched_root
-    LOG.debug("Watching {!s}".format(root))
-    inotifywait_call = '{binary} {args} "{folder}"'.format(
-        binary=cosh_config_obj.inotifywait,
-        args=' '.join(cosh_config_obj.inotifywait_args),
-        folder=root)
-
-    rc = subprocess.call(inotifywait_call, shell=True)
-    while rc == 0:
-        _onchange(cosh_config_obj)
-        rc = subprocess.call(inotifywait_call, shell=True)
-
-
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(epilog="coshed {:s}".format(
         coshed.__version__))
@@ -172,11 +102,13 @@ if __name__ == '__main__':
         LOG.info("coshed configuration:")
         LOG.info(cosh_cfg)
 
+    cosh_op = CoshedWatcher(cosh_cfg)
+
     if args.force_update:
-        _onchange(cosh_cfg)
+        cosh_op._onchange(cosh_cfg)
         sys.exit(0)
 
     try:
-        watch(cosh_cfg)
+        cosh_op.watch(cosh_cfg)
     except KeyboardInterrupt:
         LOG.info("\nAborted.")
