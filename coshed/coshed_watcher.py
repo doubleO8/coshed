@@ -42,13 +42,17 @@ class CoshedWatcher(object):
         except AttributeError:
             self.log.debug("no scripts_d attribute")
             return
+
         glob_scripts = u'{:s}/*'.format(self.cosh_config_obj.scripts_d)
 
         for s_filename in glob.glob(glob_scripts):
             if s_filename.endswith("~"):
                 continue
+            if os.path.basename(s_filename).startswith("OFF."):
+                continue
             if not os.access(s_filename, os.X_OK):
                 continue
+
             command = u'{s_filename} {coshfile}'.format(
                 s_filename=s_filename, coshfile=self.cosh_config_obj.coshfile)
             self.log.info(" {!s}".format(command))
