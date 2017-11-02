@@ -58,5 +58,11 @@ COSHED_CONFIG_DEFAULTS = dict(
         "concat_js_sources",
         "concat_js_trunk",
         "scss_map"
+    ],
+    rsync_source="",
+    rsync_destination="",
+    rsync_exclude_from="",
+    rsync_args=[
+        "-avrn"
     ]
 )
