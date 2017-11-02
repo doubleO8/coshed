@@ -11,12 +11,11 @@ from coshed.defaults import COSHED_CONFIG_DEFAULTS, ENV_MAP
 from coshed.coshed_config import CoshedConfig
 from coshed.coshed_watcher import CoshedWatcher
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 LOG = logging.getLogger("coshed_watcher")
-
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(epilog="coshed {:s}".format(
@@ -46,8 +45,8 @@ if __name__ == '__main__':
     LOG.warning(
         " 'apt-get install inotify-tools ruby-sass' on debian "
         "derived distributions")
-    LOG.warning("For JavaScript minification css-html-js-minify"
-               "needs to be installed.")
+    LOG.warning("For JavaScript minification css-html-js-minify "
+                "needs to be installed.")
 
     for env_key, key in ENV_MAP:
         LOG.debug(

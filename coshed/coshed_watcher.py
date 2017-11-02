@@ -70,8 +70,8 @@ class CoshedWatcher(object):
                     "Missing method {!r}. IGNORED.".format(func_name))
 
     def watch(self):
-        root = self.cosh_config_obj.watched_root
-        self.log.debug("Watching {!s}".format(root))
+        root = os.path.abspath(self.cosh_config_obj.watched_root)
+        self.log.info("Watching {!s}".format(root))
         inotifywait_call = '{binary} {args} "{folder}"'.format(
             binary=self.cosh_config_obj.inotifywait,
             args=' '.join(self.cosh_config_obj.inotifywait_args),

@@ -16,6 +16,7 @@ class CoshedConfig(object):
         * default values may be set by `dict()`, kwargs and environment variables
 
     """
+
     def __init__(self, *args, **kwargs):
         self._data_sources = {
             'environ': dict(),
@@ -78,7 +79,7 @@ class CoshedConfig(object):
         if attr_name.startswith('_') or attr_name == 'coshfile':
             return False
         if self._key_set:
-            if not attr_name in self._key_set:
+            if attr_name not in self._key_set:
                 return False
         if hasattr(self, attr_name) and callable(getattr(self, attr_name)):
             return False
@@ -122,6 +123,35 @@ class CoshedConfig(object):
                     break
                 except KeyError:
                     pass
+        self._force_relative_paths()
+
+    def _rel_path(self, value):
+        coshdir = os.path.dirname(self.coshfile)
+        abs_path = os.path.abspath(value)
+        return os.path.relpath(abs_path, start=coshdir)
+
+    def _force_relative_paths(self):
+        if not self.coshfile:
+            return
+
+        for key in self.cosh_force_relative_paths:
+            value = self[key]
+            rel_value = False
+
+            if isinstance(value, (basestring, unicode)):
+                rel_value = self._rel_path(value)
+            elif isinstance(value, list):
+                rel_value = list()
+                for list_item in value:
+                    if isinstance(list_item, (basestring, unicode)):
+                        list_item = self._rel_path(list_item)
+                    elif isinstance(list_item, (tuple, list)):
+                        list_item = [self._rel_path(x) for x in list_item]
+                    rel_value.append(list_item)
+
+            if rel_value is False:
+                continue
+            self[key] = rel_value
 
     def _data_dict(self):
         data = dict()
@@ -167,6 +197,7 @@ class CoshedConfig(object):
 
     def __repr__(self):
         return repr(self._data_dict())
+
 
 class CoshedConfigReadOnly(CoshedConfig):
     def __init__(self, coshfile):

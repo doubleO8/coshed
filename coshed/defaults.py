@@ -51,4 +51,12 @@ COSHED_CONFIG_DEFAULTS = dict(
     #: *watched_root*
     scripts_d=SCRIPTS_D_ROOT,
     css_html_js_minify=CSS_HTML_JS_MINIFY_BINARY,
+    #: keys for which relative paths to *coshfile* are enforced
+    cosh_force_relative_paths=[
+        "watched_root",
+        "scripts_d",
+        "concat_js_sources",
+        "concat_js_trunk",
+        "scss_map"
+    ]
 )
