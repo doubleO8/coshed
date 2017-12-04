@@ -35,12 +35,12 @@ class CoshedWatcher(object):
                 self.cosh_config_obj.concat_js_trunk,
                 closure_binary=self.cosh_config_obj.closure_binary
             )
-
-        cat = CoshedConcatMinifiedJS(
-            self.cosh_config_obj.concat_js_sources,
-            self.cosh_config_obj.concat_js_trunk,
-            css_html_js_minify=self.cosh_config_obj.css_html_js_minify
-        )
+        else:
+            cat = CoshedConcatMinifiedJS(
+                self.cosh_config_obj.concat_js_sources,
+                self.cosh_config_obj.concat_js_trunk,
+                css_html_js_minify=self.cosh_config_obj.css_html_js_minify
+            )
         cat.write()
 
     def call_scripts(self):
