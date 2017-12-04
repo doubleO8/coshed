@@ -33,7 +33,7 @@ class CoshedWatcher(object):
             cat = CoshedConcatClosure(
                 self.cosh_config_obj.concat_js_sources,
                 self.cosh_config_obj.concat_js_trunk,
-                closure_binary=self.cosh_config_obj.closure_binary
+                closure_binary=self.cosh_config_obj.closure_compiler
             )
         else:
             cat = CoshedConcatMinifiedJS(
