@@ -5,7 +5,7 @@ import subprocess
 import logging
 import glob
 
-from coshed.coshed_concat import CoshedConcatMinifiedJS
+from coshed.coshed_concat import CoshedConcatMinifiedJS, CoshedConcatClosure
 
 
 class CoshedWatcher(object):
@@ -29,6 +29,13 @@ class CoshedWatcher(object):
     def call_js(self):
         if not self.cosh_config_obj.concat_js_sources:
             self.log.debug("Empty concat_js_sources!")
+        if self.cosh_config_obj.concat_js_compiler == 'closure':
+            cat = CoshedConcatClosure(
+                self.cosh_config_obj.concat_js_sources,
+                self.cosh_config_obj.concat_js_trunk,
+                closure_binary=self.cosh_config_obj.closure_binary
+            )
+
         cat = CoshedConcatMinifiedJS(
             self.cosh_config_obj.concat_js_sources,
             self.cosh_config_obj.concat_js_trunk,

@@ -9,11 +9,13 @@ import shutil
 import subprocess
 import logging
 
-from defaults import CSS_HTML_JS_MINIFY_BINARY
+from defaults import CSS_HTML_JS_MINIFY_BINARY, CLOSURE_COMPILER_BINARY
 
 #: call css-html-js-minify for creating <filename_trunk>.min.js
 CSS_HTML_JS_MINIFY_CALL = '{binary} "{filename}"'
 
+CLOSURE_COMPILER_CALL = '{binary} --compilation_level {compilation_level} ' \
+                        '"{filename}" --js_output_file "{js_output_file}"'
 
 class CoshedConcat(object):
     def __init__(self, filenames, trunk_template, **kwargs):
@@ -101,7 +103,6 @@ class CoshedConcat(object):
 
         return os.path.abspath(target)
 
-
 class CoshedConcatMinifiedJS(CoshedConcat):
     def __init__(self, filenames, trunk_template, **kwargs):
         CoshedConcat.__init__(self, filenames, trunk_template, **kwargs)
@@ -134,6 +135,42 @@ class CoshedConcatMinifiedJS(CoshedConcat):
 
         return rc
 
+
+class CoshedConcatClosure(CoshedConcat):
+    def __init__(self, filenames, trunk_template, **kwargs):
+        CoshedConcat.__init__(self, filenames, trunk_template, **kwargs)
+        self.log = logging.getLogger(__name__)
+        self.closure_binary = kwargs.get('closure_binary',
+                                         CLOSURE_COMPILER_BINARY)
+        self.compilation_level = kwargs.get("compilation_level",
+                                            "SIMPLE_OPTIMIZATIONS")
+
+    def _mangle(self):
+        """
+
+        Returns:
+
+        >>> a = os.path.abspath(os.path.join(os.path.dirname(__file__), '../contrib/html_example/js/eins.js'))
+        >>> b = os.path.abspath(os.path.join(os.path.dirname(__file__), '../contrib/html_example/js/two.js'))
+        >>> ccm = CoshedConcatClosure([a, b], "/tmp/concat.js")
+        >>> ccm.write()
+        '/tmp/concat.0a72b7a757548899130fb9ef1bb49d7ec4b7c9683b8bd006404e833c37f6b0d7.js'
+        >>> ccm.hexdigest
+        '0a72b7a757548899130fb9ef1bb49d7ec4b7c9683b8bd006404e833c37f6b0d7'
+        """
+        out_filename = '{:s}.min.{:s}'.format(self.uuid_value, self.ext)
+        out_target = os.path.join(self.tmp, out_filename)
+
+        minime = CLOSURE_COMPILER_CALL.format(
+            binary=self.closure_binary, filename=self.tmp_target,
+            js_output_file=out_target,
+            compilation_level=self.compilation_level)
+        rc = subprocess.call(minime, shell=True)
+
+        if os.path.exists(out_target):
+            self.tmp_target = out_target
+
+        return rc
 
 if __name__ == '__main__':
     import doctest

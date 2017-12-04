@@ -13,11 +13,15 @@ SCRIPTS_D_ROOT = os.path.join(PROJECT_ROOT, 'contrib/cosh_scripts.d')
 #: css-html-js-minify script path
 CSS_HTML_JS_MINIFY_BINARY = "css-html-js-minify.py"
 
+#: closure-compiler path
+CLOSURE_COMPILER_BINARY = "closure-compiler"
+
 #: default environment key to configuration key mappings
 ENV_MAP = [
     ("COSH_SCSS", "scss"),
     ("COSH_INOTIFYWAIT", 'inotifywait'),
-    ("COSH_CSS_HTML_JS_MINIFY", CSS_HTML_JS_MINIFY_BINARY)
+    ("COSH_CSS_HTML_JS_MINIFY", CSS_HTML_JS_MINIFY_BINARY),
+    ("COSH_CLOSURE_COMPILER", CLOSURE_COMPILER_BINARY),
 ]
 
 #: default configuration values
@@ -42,6 +46,7 @@ COSHED_CONFIG_DEFAULTS = dict(
     #: list of paths: Javascript files to concatenate
     concat_js_sources=[],
     concat_js_trunk=os.path.join(JS_ROOT, 'lib.bundle.js'),
+    concat_js_compiler="closure",
     #: default locations of used binaries
     inotifywait="inotifywait",
     scss="scss",
@@ -51,6 +56,7 @@ COSHED_CONFIG_DEFAULTS = dict(
     #: *watched_root*
     scripts_d=SCRIPTS_D_ROOT,
     css_html_js_minify=CSS_HTML_JS_MINIFY_BINARY,
+    closure_compiler=CLOSURE_COMPILER_BINARY,
     #: keys for which relative paths to *coshfile* are enforced
     cosh_force_relative_paths=[
         "watched_root",
