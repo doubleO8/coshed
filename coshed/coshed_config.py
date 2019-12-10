@@ -3,6 +3,7 @@
 import os
 import json
 import argparse
+import codecs
 
 from coshed.defaults import COSH_FILE_DEFAULT
 
@@ -60,7 +61,7 @@ class CoshedConfig(object):
             self._coshfile = os.path.abspath(coshfile)
 
         if os.path.isfile(self._coshfile):
-            with open(self._coshfile, "rb") as src:
+            with codecs.open(self._coshfile, "rb", 'utf-8') as src:
                 try:
                     self._data_sources["config"] = json.load(src)
                 except ValueError:
