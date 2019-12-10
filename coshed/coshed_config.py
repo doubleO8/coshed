@@ -4,7 +4,7 @@ import os
 import json
 import argparse
 
-from defaults import COSH_FILE_DEFAULT
+from coshed.defaults import COSH_FILE_DEFAULT
 
 
 class CoshedConfig(object):
