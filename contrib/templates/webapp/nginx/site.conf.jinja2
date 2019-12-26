@@ -1,0 +1,40 @@
+server {
+    access_log /var/log/nginx/{{ app_name }}-access.log combined;
+    error_log  /var/log/nginx/{{ app_name }}-error.log info;
+
+    set $app_root {{ app_root }};
+    set $static {{ static_folder|default('$app_root/static') }};
+
+    listen      {{ listen_port }};
+
+    root $static;
+
+    charset     utf-8;
+    client_max_body_size 12M;
+    client_body_buffer_size 2M;
+
+    # serve static files
+    location /static {
+        alias $static;
+        include snippets/enable_cors;
+        access_log off;
+
+        expires +14d;
+        add_header Cache-Control public;
+    }
+
+    location / {
+        include snippets/enable_cors;
+        include uwsgi_params;
+        uwsgi_pass unix:/opt/uwsgi-sockets/{{ app_name }};
+    }
+
+    # Enable gzip but do not remove ETag headers
+    gzip on;
+    gzip_vary on;
+    gzip_comp_level 4;
+    gzip_min_length 256;
+    gzip_proxied expired no-cache no-store private no_last_modified no_etag auth;
+    gzip_types application/javascript application/json text/javascript text/css text/html;
+}
+

@@ -1,0 +1,22 @@
+[uwsgi]
+processes = 2
+uid = www-data
+
+#application's base folder
+base = {{ app_root }}
+chdir = %(base)
+
+# python module to import
+module = {{ app_name }}
+
+# flask instance
+callable = app
+
+virtualenv = %(base)/venv
+
+socket = /opt/uwsgi-sockets/%n
+chmod-socket    = 666
+
+logto = /var/log/uwsgi/vassals/%n.log
+plugins = {{ uwsgi_plugin|default('python3') }}
+

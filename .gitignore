@@ -13,3 +13,6 @@
 /js
 /venv
 /venv3
+/contrib/nginx
+/contrib/uwsgi-emperor
+/static

@@ -1,0 +1,19 @@
+{
+  "css": {
+    "lib": [
+      "css/x.css"
+    ],
+    "app": [
+      "css/app.css"
+    ]
+  },
+  "js": {
+    "lib": [
+      "js/eins.js",
+      "js/two.js"
+    ],
+    "app": [
+      "js/y.js"
+    ]
+  }
+}
