@@ -16,3 +16,4 @@
 /contrib/nginx
 /contrib/uwsgi-emperor
 /static
+/*.egg-info
