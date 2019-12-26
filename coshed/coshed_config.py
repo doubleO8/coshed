@@ -135,6 +135,11 @@ class CoshedConfig(object):
         if not self.coshfile:
             return
 
+        try:
+            self.cosh_force_relative_paths
+        except AttributeError:
+            return
+
         for key in self.cosh_force_relative_paths:
             value = self[key]
             rel_value = False
