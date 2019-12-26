@@ -12,6 +12,8 @@ import codecs
 
 from jinja2 import Environment, FileSystemLoader
 
+from coshed import bundy
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -153,6 +155,14 @@ class Wolfication(object):
                 os.makedirs(target_parent)
             self._dump(target, func(), overwrite=self.template_args['force'])
         self.instructor(spec, self.template_args['configuration_folders'])
+
+        source_path = os.path.join(
+            self.template_args['static_folder'],
+            'wolfication_specification.json'
+        )
+
+        if os.path.isfile(source_path):
+            bundy.cli_stub(source_path)
 
 
 if __name__ == '__main__':
