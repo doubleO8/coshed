@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import object
 import os
 import uuid
 import tempfile
@@ -9,7 +12,7 @@ import shutil
 import subprocess
 import logging
 
-from defaults import CSS_HTML_JS_MINIFY_BINARY, CLOSURE_COMPILER_BINARY
+from .defaults import CSS_HTML_JS_MINIFY_BINARY, CLOSURE_COMPILER_BINARY
 
 #: call css-html-js-minify for creating <filename_trunk>.min.js
 CSS_HTML_JS_MINIFY_CALL = '{binary} "{filename}"'

@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 import os
 import unittest
 import uuid
 
-from coshed_unittest import CoshedTestCaseParts
+from .coshed_unittest import CoshedTestCaseParts
 from coshed.coshed_config import CoshedConfig
 
 

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 
 from bs4 import BeautifulSoup
 
-from utilities import to_unicode_or_bust
+from .utilities import to_unicode_or_bust
 
 
 def _n(path):

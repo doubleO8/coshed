@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from past.builtins import basestring
+from builtins import object
 import os
 import json
 import argparse
@@ -139,12 +141,12 @@ class CoshedConfig(object):
             value = self[key]
             rel_value = False
 
-            if isinstance(value, (basestring, unicode)):
+            if isinstance(value, (basestring, str)):
                 rel_value = self._rel_path(value)
             elif isinstance(value, list):
                 rel_value = list()
                 for list_item in value:
-                    if isinstance(list_item, (basestring, unicode)):
+                    if isinstance(list_item, (basestring, str)):
                         list_item = self._rel_path(list_item)
                     elif isinstance(list_item, (tuple, list)):
                         list_item = [self._rel_path(x) for x in list_item]
@@ -156,7 +158,7 @@ class CoshedConfig(object):
 
     def _data_dict(self):
         data = dict()
-        for key in self.keys():
+        for key in list(self.keys()):
             data[key] = self[key]
         return data
 
@@ -185,13 +187,13 @@ class CoshedConfig(object):
                 yield attr_name
 
     def kv_pairs(self):
-        for key in self.keys():
+        for key in list(self.keys()):
             value = getattr(self, key)
             yield key, value
 
     def __str__(self):
         items = list()
-        for attr_name in self.keys():
+        for attr_name in list(self.keys()):
             items.append((attr_name, getattr(self, attr_name)))
         return '<{:s} {:s}>'.format(self.__class__.__name__, ' '.join(
             ['{:s}={!r}'.format(k, v) for k, v in sorted(items)]))

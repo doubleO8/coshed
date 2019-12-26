@@ -16,4 +16,4 @@ data = {
 }
 
 req = requests.post('https://closure-compiler.appspot.com/compile', data=data)
-print req.text
+print(req.text)
