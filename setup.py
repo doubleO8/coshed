@@ -14,5 +14,20 @@ setup(
     long_description="",
     url="https://github.com/doubleO8/coshed",
     packages=['coshed'],
-    scripts=['coshed-watcher.py']
+    install_requires=[
+        "beautifulsoup4>=4.6.0",
+        "requests>=2.13.0",
+        "pendulum==2.0.5",
+        "future==0.18.2",
+        "six==1.13.0",
+        "Jinja2==2.10.3",
+        "Flask==1.1.1",
+    ],
+    scripts=['coshed-watcher.py'],
+    entry_points={
+        'console_scripts': [
+            'coshed-bundy = coshed.bundy:cli_stub',
+            'coshed-wolfication = coshed.wolfication:cli_stub',
+        ]
+    }
 )
