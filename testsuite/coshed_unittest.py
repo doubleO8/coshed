@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from builtins import object
 import sys
 import os
 import tempfile
 import json
+import codecs
 
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..')))
@@ -16,5 +18,5 @@ class CoshedTestCaseParts(object):
         return os.path.join(self._tmp, rel_path)
 
     def load_json(self, path):
-        with open(path, "rb") as src:
+        with codecs.open(path, "rb", "utf-8") as src:
             return json.load(src)

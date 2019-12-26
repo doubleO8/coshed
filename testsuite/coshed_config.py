@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 import os
 import unittest
 import uuid
 
-from coshed_unittest import CoshedTestCaseParts
+from .coshed_unittest import CoshedTestCaseParts
 from coshed.coshed_config import CoshedConfig
 
 
@@ -95,10 +96,15 @@ class CoshConfigfileAndEnvironTestCase(unittest.TestCase, CoshedTestCaseParts):
 class EmptyTestCase(unittest.TestCase, CoshedTestCaseParts):
     def setUp(self):
         self.cfg = CoshedConfig()
+        assert os.path.exists(self.cfg.coshfile) is False
+
+    def tearDown(self):
+        if os.path.exists(self.cfg.coshfile):
+            os.unlink(self.cfg.coshfile)
 
     def test_defaults(self):
-        self.assertEqual([], list(self.cfg.keys()))
         self.assertFalse(os.path.isfile(self.cfg.coshfile))
+        self.assertEqual([], list(self.cfg.keys()))
 
     def test_read_altered_coshfile(self):
         self.cfg["x"] = 123
