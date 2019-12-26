@@ -11,6 +11,7 @@ import functools
 import shutil
 import subprocess
 import logging
+import codecs
 
 from .defaults import CSS_HTML_JS_MINIFY_BINARY, CLOSURE_COMPILER_BINARY
 
@@ -42,9 +43,9 @@ class CoshedConcat(object):
             self.log.warning("No sources, no gain.")
             return 0
 
-        with open(self.tmp_target, "wb") as tgt:
+        with codecs.open(self.tmp_target, "wb", "utf-8") as tgt:
             for filename in self.sources:
-                with open(filename, "rb") as src:
+                with codecs.open(filename, "rb", "utf-8") as src:
                     items += 1
                     for chunk in iter(functools.partial(src.read, 4096), ''):
                         tgt.write(chunk)
@@ -89,7 +90,7 @@ class CoshedConcat(object):
         self._concat()
         self.mangle()
         hasher = hashlib.new("sha256")
-        with open(self.tmp_target, "rb") as src:
+        with codecs.open(self.tmp_target, "rb", "utf-8") as src:
             for chunk in iter(functools.partial(src.read, 4096), ''):
                 hasher.update(chunk)
         self.hexdigest = hasher.hexdigest()

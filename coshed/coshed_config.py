@@ -137,6 +137,11 @@ class CoshedConfig(object):
         if not self.coshfile:
             return
 
+        try:
+            self.cosh_force_relative_paths
+        except AttributeError:
+            return
+
         for key in self.cosh_force_relative_paths:
             value = self[key]
             rel_value = False
@@ -178,7 +183,7 @@ class CoshedConfig(object):
         if self._data_sources["config"] == data:
             return
 
-        with open(self._coshfile, "wb") as tgt:
+        with codecs.open(self._coshfile, "wb", "utf-8") as tgt:
             json.dump(data, tgt, indent=2)
 
     def keys(self):

@@ -3,6 +3,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import os
+import codecs
 
 from bs4 import BeautifulSoup
 
@@ -53,7 +54,7 @@ def eval_html_sourcefile(item, root=None):
 
     parent = os.path.abspath(os.path.dirname(filename))
     resource_tags = ['script', 'link', 'img']
-    with open(filename, "rb") as source:
+    with codecs.open(filename, "rb", "utf-8") as source:
         soup = BeautifulSoup(source, 'html.parser')
 
         for media_ref in soup.find_all(resource_tags):
