@@ -119,6 +119,7 @@ def cli_stub(source_path=None, uwsgi_config_path=None):
         source_path = os.path.join(
             os.getcwd(), 'static/wolfication_specification.json'
         )
+
     if uwsgi_config_path is None:
         uwsgi_config_path = os.path.join(os.getcwd(), 'contrib/uwsgi-emperor/')
 
@@ -130,8 +131,9 @@ def cli_stub(source_path=None, uwsgi_config_path=None):
 
     bundling_result = bundle(source_specification)
 
-    if os.path.isfile(uwsgi_config_path):
+    if os.path.isdir(uwsgi_config_path):
         uwsgi_files = list()
+
         for item in os.listdir(uwsgi_config_path):
             uwsgi_files.append(item)
 
@@ -143,5 +145,4 @@ def cli_stub(source_path=None, uwsgi_config_path=None):
                     'touch',
                     os.path.abspath(os.path.join(uwsgi_config_path, uw_file))
                 ]
-                # print(args)
                 subprocess.call(args)
