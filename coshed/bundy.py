@@ -13,6 +13,7 @@ import json
 import codecs
 import platform
 import subprocess
+import argparse
 
 from coshed.tools import load_json
 
@@ -87,10 +88,12 @@ def export_index(index_path, assets):
         json.dump(assets, tgt, indent=2, sort_keys=True)
 
 
-def bundle(source_specification):
+def bundle(source_specification, index_path=None):
     assets = dict()
     root_path = source_specification['_static']
-    index_path = os.path.join(root_path, "index.json")
+
+    if index_path is None:
+        index_path = os.path.join(root_path, "index.json")
 
     if os.path.isfile(index_path):
         remove_old_combined(index_path, root_path=root_path)
@@ -114,27 +117,67 @@ def bundle(source_specification):
     return assets
 
 
-def cli_stub(source_path=None, uwsgi_config_path=None):
-    if source_path is None:
-        source_path = os.path.join(
+def cli_stub(**kwargs):
+    description = "Web application bundling"
+    defaults = dict(
+        source_path=os.path.join(
             os.getcwd(), 'static/wolfication_specification.json'
-        )
+        ),
+        uwsgi_config_path=os.path.join(os.getcwd(), 'contrib/uwsgi-emperor/')
+    )
 
-    if uwsgi_config_path is None:
-        uwsgi_config_path = os.path.join(os.getcwd(), 'contrib/uwsgi-emperor/')
+    for kw_key in ("source_path", "uwsgi_config_path", "index_path"):
+        val = kwargs.get(kw_key)
+        if val is not None:
+            defaults[kw_key] = val
 
-    source_specification = load_json(source_path)
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('app_name', metavar='APP',
+                        help='web application name')
+
+    # parser.add_argument(
+    #     '-n', '--dry-run', action='store_true',
+    #     dest="dry_run",
+    #     default=False, help="Dry run mode")
+
+    # parser.add_argument(
+    #     '-f', '--force', action='store_true',
+    #     dest="force",
+    #     default=False, help="force mode (overwrites stuff etc.)")
+
+    parser.add_argument(
+        '-s', '--specification-source', default=defaults['source_path'],
+        help="Sources specification. Default: %(default)s", dest="source_path",
+        metavar="PATH"
+    )
+
+    parser.add_argument(
+        '-i', '--assets-index', default=None,
+        help="Assets index path", dest="index_path",
+        metavar="PATH"
+    )
+
+    parser.add_argument(
+        '-u', '--uwsgi-configuration-path',
+        default=defaults['uwsgi_config_path'],
+        help="uWSGI configuration path. Default: %(default)s",
+        dest="uwsgi_config_path", metavar="PATH"
+    )
+
+    cli_args = parser.parse_args()
+
+    source_specification = load_json(cli_args.source_path)
     try:
         source_specification['_static']
     except KeyError:
-        source_specification['_static'] = os.path.dirname(source_path)
+        source_specification['_static'] = os.path.dirname(cli_args.source_path)
 
-    bundling_result = bundle(source_specification)
+    bundle(source_specification, index_path=cli_args.index_path)
 
-    if os.path.isdir(uwsgi_config_path):
+    if os.path.isdir(cli_args.uwsgi_config_path):
         uwsgi_files = list()
 
-        for item in os.listdir(uwsgi_config_path):
+        for item in os.listdir(cli_args.uwsgi_config_path):
             uwsgi_files.append(item)
 
         if platform.system() != 'Linux':
@@ -143,6 +186,7 @@ def cli_stub(source_path=None, uwsgi_config_path=None):
             for uw_file in uwsgi_files:
                 args = [
                     'touch',
-                    os.path.abspath(os.path.join(uwsgi_config_path, uw_file))
+                    os.path.abspath(
+                        os.path.join(cli_args.uwsgi_config_path, uw_file))
                 ]
                 subprocess.call(args)
