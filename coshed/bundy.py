@@ -5,7 +5,6 @@ from __future__ import print_function
 from future import standard_library
 
 standard_library.install_aliases()
-from past.builtins import basestring
 import os
 import hashlib
 import io as StringIO
@@ -15,11 +14,12 @@ import platform
 import subprocess
 import argparse
 
+import six
 from coshed.tools import load_json
 
 
 def combine(sources, root_path, trunk=None):
-    if isinstance(sources, (basestring, str)):
+    if isinstance(sources, six.string_types):
         sources = [sources]
 
     sources = [os.path.abspath(os.path.join(root_path, x)) for x in sources]
@@ -69,7 +69,7 @@ def remove_old_combined(index_path, root_path):
         for item_key in source_specification[root]:
             items = source_specification[root][item_key]
 
-            if isinstance(items, (basestring, str)):
+            if isinstance(items, six.string_types):
                 items = [items]
 
             delete_me += items
