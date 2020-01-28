@@ -132,8 +132,8 @@ def cli_stub(**kwargs):
             defaults[kw_key] = val
 
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('app_name', metavar='APP',
-                        help='web application name')
+    # parser.add_argument('app_name', metavar='APP',
+    #                     help='web application name')
 
     # parser.add_argument(
     #     '-n', '--dry-run', action='store_true',
