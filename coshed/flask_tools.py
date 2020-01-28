@@ -4,9 +4,14 @@ import uuid
 import logging
 from logging.handlers import RotatingFileHandler
 
+from flask import abort, jsonify
 from flask_cors import CORS
 from flask_compress import Compress
 import six
+import six.moves.urllib.parse as urlparse
+
+from coshed.swagger_glue import next_best_swagger_in_source
+from coshed.tools import load_json
 
 #: custom log formatter
 formatter = logging.Formatter(
@@ -48,3 +53,29 @@ def wolfication(flask_app_instance=None, jinja_filters=None, app_name=None):
         rotating_app_log(flask_app_instance, app_name)
 
     return flask_app_instance
+
+
+def serve_swagger_handler(swagger_root_path, app_name=None, overrides=None):
+    """
+    Load swagger specification, apply overrides and return Flask HTTP
+    response object.
+
+    Args:
+        swagger_root_path: swagger files path
+        app_name: application name
+        overrides (dict): specification overrides
+
+    Returns:
+        Flask.Response: HTTP response object
+    """
+    try:
+        swagger_in = next_best_swagger_in_source(swagger_root_path,
+                                                 app_name=app_name)
+    except ValueError:
+        abort(404)
+
+    swagger_content = load_json(swagger_in)
+    if overrides is not None:
+        swagger_content.update(overrides)
+
+    return jsonify(swagger_content)
