@@ -163,6 +163,7 @@ class AppResponse(dict):
         except TypeError:
             body = pprint.pformat(self)
             headers["Content-Type"] = "text/plain"
+            status_code = 500
 
         return flask.Response(
             status=status_code,
