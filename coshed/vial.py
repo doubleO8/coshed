@@ -118,7 +118,7 @@ class AppResponse(dict):
             yield i_url, i_label
 
     def flask_obj(self, status_code=200, drop_dev=None, with_version=True,
-                  expires=None, headers=None):
+                  expires=None, headers=None, not_to_be_exposed=None):
         """
         Generate a :py:class:`flask.Response` object for current application
         response object.
@@ -129,6 +129,7 @@ class AppResponse(dict):
             with_version (bool): include version information
             expires: expiration specification
             headers (dict): headers
+            not_to_be_exposed (iterable, optional): key/value pairs not to be exposed
 
         Returns:
             flask.Response: HTTP response object
@@ -143,6 +144,10 @@ class AppResponse(dict):
 
         if with_version is False:
             del_keys.append('version')
+
+        if not_to_be_exposed:
+            for ntbe in not_to_be_exposed:
+                del_keys.append(ntbe)
 
         for del_key in del_keys:
             try:
