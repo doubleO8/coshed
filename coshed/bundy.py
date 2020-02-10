@@ -13,12 +13,16 @@ import codecs
 import platform
 import subprocess
 import argparse
+import logging
 
 import six
 from coshed.tools import load_json
 
+LOG = logging.getLogger(__name__)
+
 
 def combine(sources, root_path, trunk=None):
+    included_sources = 0
     if isinstance(sources, six.string_types):
         sources = [sources]
 
@@ -26,22 +30,33 @@ def combine(sources, root_path, trunk=None):
     folder = os.path.dirname(sources[0])
     b_name0 = os.path.basename(sources[0])
     trunk0, ext = os.path.splitext(b_name0)
-    # print sources[0], b_name0, trunk0, ext
 
     if trunk is None:
         trunk = trunk0
+
+    LOG.info("Combining ...")
+    LOG.debug(" folder   : {!s}".format(folder))
+    LOG.debug(" trunk/ext: {!s} {!s}".format(trunk0, ext))
 
     content = StringIO.StringIO()
     hash_cookie = hashlib.sha1()
     source_end = "\n"
 
+
     for source in sources:
+        if not os.path.exists(source):
+            LOG.error("Source missing: {!s}".format(source))
+            continue
+        LOG.debug("  + {!s}".format(source))
+        included_sources += 1
+
         with codecs.open(source, "rb", 'utf-8') as src:
             chunk = src.read(1024).replace('sourceMappingURL', '')
             while chunk:
                 content.write(chunk)
                 hash_cookie.update(chunk.encode('utf-8'))
                 chunk = src.read(1024).replace('sourceMappingURL', '')
+
         try:
             content.write(source_end)
         except TypeError:
@@ -53,8 +68,14 @@ def combine(sources, root_path, trunk=None):
     target = os.path.join(folder, filename)
     content.seek(0)
 
-    with codecs.open(target, "wb", 'utf-8') as tgt:
-        tgt.write(content.read())
+    if included_sources:
+        LOG.info(" ... {!s}".format(target))
+
+        with codecs.open(target, "wb", 'utf-8') as tgt:
+            tgt.write(content.read())
+    else:
+        LOG.info(" ... NO CONTENT.")
+        raise ValueError("No content")
 
     return os.path.relpath(target, root_path).replace("\\", '/')
 
@@ -95,6 +116,10 @@ def bundle(source_specification, index_path=None):
     if index_path is None:
         index_path = os.path.join(root_path, "index.json")
 
+    LOG.info("'static files' root path: {!s}".format(
+        source_specification['_static']))
+    LOG.info("index path: {!s}".format(index_path))
+
     if os.path.isfile(index_path):
         remove_old_combined(index_path, root_path=root_path)
 
@@ -106,8 +131,12 @@ def bundle(source_specification, index_path=None):
 
         for item_key in source_specification[root]:
             items = source_specification[root][item_key]
-            items_combined = combine(items,
-                                     trunk=item_key, root_path=root_path)
+            try:
+                items_combined = combine(items,
+                                         trunk=item_key, root_path=root_path)
+            except ValueError as vexc:
+                LOG.warning(vexc)
+                continue
             asset_items[item_key] = [items_combined]
 
         assets[root] = asset_items
@@ -132,8 +161,8 @@ def cli_stub(**kwargs):
             defaults[kw_key] = val
 
     parser = argparse.ArgumentParser(description=description)
-    # parser.add_argument('app_name', metavar='APP',
-    #                     help='web application name')
+    parser.add_argument('app_name', metavar='APP',
+                        help='web application name', nargs='?')
 
     # parser.add_argument(
     #     '-n', '--dry-run', action='store_true',
@@ -181,7 +210,7 @@ def cli_stub(**kwargs):
             uwsgi_files.append(item)
 
         if platform.system() != 'Linux':
-            print("Crippled platform, skipping uWSGI magic")
+            LOG.warning("Crippled platform, skipping uWSGI magic")
         else:
             for uw_file in uwsgi_files:
                 args = [
