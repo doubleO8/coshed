@@ -24,6 +24,8 @@ BRAND_NAME = '{{ brand_name }}'
 
 APP_NAME = '{{ app_name }}'
 
+ASSETS_JSON = '{{ index_file | default("index.json")}}'
+
 DEBUG_FLAG = True
 
 #: logger instance
@@ -34,7 +36,7 @@ app = wolfication(
     Flask(__name__, static_folder=STATIC),
     jinja_filters=JINJA_FILTERS, app_name=APP_NAME)
 
-assets = load_json(os.path.join(STATIC, 'index.json'))
+assets = load_json(os.path.join(STATIC, ASSETS_JSON))
 
 
 @app.route('/favicon.ico')

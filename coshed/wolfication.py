@@ -50,6 +50,7 @@ class Wolfication(object):
         self.template_args = {
             "app_name": app_name,
             "listen_port": listen_port,
+            "index_file": 'index.{:s}.json'.format(app_name)
         }
         self.template_args.update(TEMPLATE_ARGS)
 
