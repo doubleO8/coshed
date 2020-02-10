@@ -12,7 +12,11 @@ from functools import wraps
 
 import flask
 from flask import render_template, request
-from werkzeug.contrib.cache import SimpleCache
+try:
+    from werkzeug.contrib.cache import SimpleCache
+except ImportError:
+    from cachelib import SimpleCache
+
 import pendulum
 
 import coshed
