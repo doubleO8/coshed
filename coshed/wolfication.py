@@ -9,8 +9,12 @@ import logging
 import argparse
 import copy
 import codecs
+import re
 
 from jinja2 import Environment, FileSystemLoader
+
+from coshed.bundy import PATTERN_VALID_APP_NAME
+from coshed.bundy import REGEX_VALID_APP_NAME
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -46,6 +50,12 @@ class Wolfication(object):
             listen_port = random.randint(23000, 60000)
         else:
             listen_port = int(listen_port)
+
+        if not re.match(REGEX_VALID_APP_NAME, app_name):
+            self.log.warning("Invalid app name {!r}, "
+                             "valid names regular expression is {!s}".format(
+                app_name, PATTERN_VALID_APP_NAME))
+            raise ValueError("Invalid app name")
 
         self.template_args = {
             "app_name": app_name,
@@ -193,5 +203,10 @@ def cli_stub():
         )
 
     cli_args = parser.parse_args()
-    wolfication = Wolfication(**vars(cli_args))
+
+    try:
+        wolfication = Wolfication(**vars(cli_args))
+    except ValueError as vexc:
+        sys.exit(1)
+
     wolfication.persist()
