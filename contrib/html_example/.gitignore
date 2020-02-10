@@ -1,5 +1,5 @@
-/css/lib-*
-/css/app-*
-/js/app-*
-/js/lib-*
+/css/lib[-.]*
+/css/app[-.]*
+/js/app[-.]*
+/js/lib[-.]*
 /index*.json

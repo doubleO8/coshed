@@ -39,8 +39,8 @@ def combine(sources, root_path, trunk=None):
         trunk = trunk0
 
     LOG.info("Combining ...")
-    LOG.debug(" folder   : {!s}".format(folder))
-    LOG.debug(" trunk/ext: {!s} {!s}".format(trunk0, ext))
+    LOG.debug(" folder: {!s}".format(folder))
+    LOG.debug(" trunk : {!s}{!s}".format(trunk0, ext))
 
     content = StringIO.StringIO()
     hash_cookie = hashlib.sha1()
@@ -137,13 +137,19 @@ def bundle(source_specification, index_path=None, app_name=None):
             continue
 
         for item_key in source_specification[root]:
+            trunk = item_key
             items = source_specification[root][item_key]
+
+            if app_name:
+                trunk = '.'.join((item_key, app_name))
+
             try:
                 items_combined = combine(items,
-                                         trunk=item_key, root_path=root_path)
+                                         trunk=trunk, root_path=root_path)
             except ValueError as vexc:
                 LOG.warning(vexc)
                 continue
+
             asset_items[item_key] = [items_combined]
 
         assets[root] = asset_items
