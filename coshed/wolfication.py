@@ -12,9 +12,11 @@ import codecs
 import re
 
 from jinja2 import Environment, FileSystemLoader
+import six
 
 from coshed.bundy import PATTERN_VALID_APP_NAME
 from coshed.bundy import REGEX_VALID_APP_NAME
+from coshed.wolfication_template_contents import TEMPLATES_CONTENT
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -45,6 +47,7 @@ class Wolfication(object):
     def __init__(self, app_name, listen_port=None, *args, **kwargs):
         self.log = logging.getLogger(__name__)
         self.dry_run = kwargs.get("dry_run", False)
+        self.do_init = kwargs.get("do_init", False)
 
         if listen_port is None:
             listen_port = random.randint(23000, 60000)
@@ -80,6 +83,11 @@ class Wolfication(object):
         self.templates_root = os.path.abspath(
             os.path.join(self.template_args['contrib_root'], 'templates/webapp')
         )
+
+        self.template_args['templates_root'] = self.templates_root
+
+        for key, value in sorted(six.iteritems(self.template_args)):
+            self.log.info("{key:20}: {value}".format(key=key, value=value))
 
         self.env = Environment(loader=FileSystemLoader(self.templates_root))
 
@@ -135,7 +143,34 @@ class Wolfication(object):
         for msg in messages:
             self.log.info(msg)
 
+    def _initialise_environment(self):
+        roots = (
+        'project_root', 'templates_root', 'contrib_root', 'static_folder')
+
+        for root_key in roots:
+            root_dir = self.template_args[root_key]
+
+            if not os.path.isdir(root_dir):
+                self.log.warning("Missing folder {!s}: {!s}".format(
+                    root_key, root_dir))
+                os.makedirs(root_dir)
+        for rel_path, content in six.iteritems(TEMPLATES_CONTENT):
+            abs_path = os.path.join(self.template_args['templates_root'],
+                                    rel_path)
+
+            if not os.path.isfile(abs_path):
+                rel_folder = os.path.dirname(rel_path)
+                abs_folder = os.path.join(self.template_args['templates_root'],
+                                          rel_folder)
+                os.makedirs(abs_folder, exist_ok=True)
+
+            with open(abs_path, "w") as tgt:
+                tgt.write(content)
+
     def persist(self):
+        if self.do_init:
+            self._initialise_environment()
+
         spec = dict(
             nginx_config=('{contrib_root}/nginx/{app_name}.conf'.format(
                 **self.template_args), self.nginx_site),
@@ -193,6 +228,11 @@ def cli_stub():
         help="Use CentOS platform configuration defaults",
         dest="configuration_folders"
     )
+
+    parser.add_argument(
+        '-i', '--init', action='store_true',
+        dest="do_init",
+        default=False, help="Initialise environment")
 
     params_group = parser.add_argument_group("More Parameters")
     for key in TEMPLATE_ARGS:
