@@ -14,9 +14,13 @@ import platform
 import subprocess
 import argparse
 import logging
+import re
 
 import six
 from coshed.tools import load_json
+
+PATTERN_VALID_APP_NAME = r'[a-z]+[a-z0-9\-\_]*[a-z0-9]+'
+REGEX_VALID_APP_NAME = re.compile(PATTERN_VALID_APP_NAME, re.I)
 
 LOG = logging.getLogger(__name__)
 
@@ -41,7 +45,6 @@ def combine(sources, root_path, trunk=None):
     content = StringIO.StringIO()
     hash_cookie = hashlib.sha1()
     source_end = "\n"
-
 
     for source in sources:
         if not os.path.exists(source):
@@ -109,12 +112,16 @@ def export_index(index_path, assets):
         json.dump(assets, tgt, indent=2, sort_keys=True)
 
 
-def bundle(source_specification, index_path=None):
+def bundle(source_specification, index_path=None, app_name=None):
     assets = dict()
     root_path = source_specification['_static']
 
     if index_path is None:
         index_path = os.path.join(root_path, "index.json")
+
+        if app_name:
+            index_path = os.path.join(
+                root_path, "index.{:s}.json".format(app_name))
 
     LOG.info("'static files' root path: {!s}".format(
         source_specification['_static']))
@@ -147,6 +154,7 @@ def bundle(source_specification, index_path=None):
 
 
 def cli_stub(**kwargs):
+    app_name = None
     description = "Web application bundling"
     defaults = dict(
         source_path=os.path.join(
@@ -201,7 +209,17 @@ def cli_stub(**kwargs):
     except KeyError:
         source_specification['_static'] = os.path.dirname(cli_args.source_path)
 
-    bundle(source_specification, index_path=cli_args.index_path)
+    if cli_args.app_name:
+        if re.match(REGEX_VALID_APP_NAME, cli_args.app_name):
+            app_name = cli_args.app_name
+        else:
+            LOG.warning("Invalid app name {!r}, "
+                        "valid names regular expression is {!s}".format(
+                cli_args.app_name, PATTERN_VALID_APP_NAME))
+            raise ValueError("Invalid app name")
+
+    bundle(source_specification,
+           index_path=cli_args.index_path, app_name=app_name)
 
     if os.path.isdir(cli_args.uwsgi_config_path):
         uwsgi_files = list()
