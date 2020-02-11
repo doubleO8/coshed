@@ -18,18 +18,20 @@ from coshed.bundy import PATTERN_VALID_APP_NAME
 from coshed.bundy import REGEX_VALID_APP_NAME
 from coshed.wolfication_template_contents import TEMPLATES_CONTENT
 
+PATH_KEYS = ('project_root', 'app_root', 'static_folder')
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
-TEMPLATE_ARGS = dict(
+TEMPLATE_ARGS_DEFAULTS = dict(
     app_root=os.path.abspath(os.getcwd()),
     brand_name=None,
     project_root=os.path.abspath(os.getcwd()),
 )
 
-TEMPLATE_ARGS['static_folder'] = os.path.join(
-    TEMPLATE_ARGS['app_root'], 'static')
+TEMPLATE_ARGS_DEFAULTS['static_folder'] = os.path.join(
+    TEMPLATE_ARGS_DEFAULTS['app_root'], 'static')
 
 CONFIGURATION_FOLDERS = dict(
     uwsgi_vassals='/etc/uwsgi-emperor/vassals',
@@ -65,10 +67,16 @@ class Wolfication(object):
             "listen_port": listen_port,
             "index_file": 'index.{:s}.json'.format(app_name)
         }
-        self.template_args.update(TEMPLATE_ARGS)
+        self.template_args.update(TEMPLATE_ARGS_DEFAULTS)
 
         for key in kwargs:
             self.template_args[key] = kwargs[key]
+
+        if kwargs.get('environment_root_override'):
+            ert = kwargs.get('environment_root_override')
+            self.template_args['project_root'] = ert
+            self.template_args['app_root'] = ert
+            self.template_args['static_folder'] = os.path.join(ert, 'static')
 
         if self.template_args['brand_name'] is None:
             self.template_args['brand_name'] = app_name
@@ -86,8 +94,12 @@ class Wolfication(object):
 
         self.template_args['templates_root'] = self.templates_root
 
+        self.log.info("")
+        self.log.info("-" * 80)
         for key, value in sorted(six.iteritems(self.template_args)):
-            self.log.info("{key:20}: {value}".format(key=key, value=value))
+            self.log.info("{key:30}: {value}".format(key=key, value=value))
+        self.log.info("-" * 80)
+        self.log.info("")
 
         self.env = Environment(loader=FileSystemLoader(self.templates_root))
 
@@ -145,15 +157,19 @@ class Wolfication(object):
 
     def _initialise_environment(self):
         roots = (
-        'project_root', 'templates_root', 'contrib_root', 'static_folder')
+            'project_root', 'templates_root', 'contrib_root', 'static_folder')
 
         for root_key in roots:
             root_dir = self.template_args[root_key]
 
             if not os.path.isdir(root_dir):
-                self.log.warning("Missing folder {!s}: {!s}".format(
+                self.log.warning("Missing folder ({!s}) {!s}".format(
                     root_key, root_dir))
-                os.makedirs(root_dir)
+                if self.dry_run:
+                    self.log.info("WOULD create {!s}".format(root_dir))
+                else:
+                    os.makedirs(root_dir)
+
         for rel_path, content in six.iteritems(TEMPLATES_CONTENT):
             abs_path = os.path.join(self.template_args['templates_root'],
                                     rel_path)
@@ -162,10 +178,16 @@ class Wolfication(object):
                 rel_folder = os.path.dirname(rel_path)
                 abs_folder = os.path.join(self.template_args['templates_root'],
                                           rel_folder)
-                os.makedirs(abs_folder, exist_ok=True)
+                if self.dry_run:
+                    self.log.info("WOULD create {!s}".format(abs_folder))
+                else:
+                    os.makedirs(abs_folder, exist_ok=True)
 
-            with open(abs_path, "w") as tgt:
-                tgt.write(content)
+            if self.dry_run:
+                self.log.info("WOULD write  {!s}".format(abs_path))
+            else:
+                with open(abs_path, "w") as tgt:
+                    tgt.write(content)
 
     def persist(self):
         if self.do_init:
@@ -229,18 +251,32 @@ def cli_stub():
         dest="configuration_folders"
     )
 
-    parser.add_argument(
+    params_group = parser.add_argument_group("More Parameters")
+    for key in TEMPLATE_ARGS_DEFAULTS:
+        params_group.add_argument(
+            '--{:s}'.format(key), default=TEMPLATE_ARGS_DEFAULTS[key],
+            help="{:s}. Default is %(default)s".format(key),
+            dest=key,
+            metavar=(key in PATH_KEYS and 'PATH' or None)
+        )
+
+    env_group = parser.add_argument_group(
+        "Environment Parameters",
+        description="Override path parameters with default prefix")
+
+    env_group.add_argument(
         '-i', '--init', action='store_true',
         dest="do_init",
         default=False, help="Initialise environment")
 
-    params_group = parser.add_argument_group("More Parameters")
-    for key in TEMPLATE_ARGS:
-        params_group.add_argument(
-            '--{:s}'.format(key), default=TEMPLATE_ARGS[key],
-            help="{:s}. Default is %(default)s".format(key),
-            dest=key
-        )
+    env_group.add_argument(
+        '-e', '--environment-root',
+        dest="environment_root_override",
+        default=None, help="Override paths for {:s}".format(
+            ', '.join(PATH_KEYS)
+        ),
+        metavar="PATH"
+    )
 
     cli_args = parser.parse_args()
 
