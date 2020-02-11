@@ -142,7 +142,7 @@ Jinja2==2.10.3
 Flask==1.1.1
 Flask-Compress==1.4.0
 Flask-Cors==3.0.7
-coshed>=0.4.0
+coshed>=0.5.0
 cachelib==0.1
 """
 
