@@ -142,11 +142,36 @@ Flask==1.1.1
 Flask-Compress==1.4.0
 Flask-Cors==3.0.7
 coshed>=0.4.0
+cachelib==0.1
+"""
+
+gitignore = """
+.DS_Store
+._*
+*.py[cod]
+/.idea
+*~
+.sass-cache/
+*.css.map
+/cosh.json
+/dist
+/MANIFEST
+/scss
+/js
+/venv
+/venv3
+/*.egg-info
+"""
+
+cfignore = """
+/contrib
 """
 
 TEMPLATES_CONTENT = {
-    'nginx/site.conf.jinja2': site_conf,
-    'uwsgi-emperor/app.ini.jinja2': app_ini,
-    'skeletor.py': skeletor_py,
-    'requirements.txt': requirements_txt
+    '{templates_root}/nginx/site.conf.jinja2': site_conf,
+    '{templates_root}/uwsgi-emperor/app.ini.jinja2': app_ini,
+    '{templates_root}/skeletor.py': skeletor_py,
+    '{project_root}/requirements.txt': requirements_txt,
+    '{project_root}/.gitignore': gitignore,
+    '{project_root}/.cfignore': cfignore,
 }
