@@ -122,7 +122,7 @@ class Wolfication(object):
         with codecs.open(path, "wb", 'utf-8') as tgt:
             tgt.write(content)
 
-    def instructor(self, spec, configuration_folders=None):
+    def instructor_install(self, spec, configuration_folders=None):
         if configuration_folders is None:
             configuration_folders = CONFIGURATION_FOLDERS
 
@@ -134,8 +134,9 @@ class Wolfication(object):
         merged['nginx_config_bname'] = os.path.basename(merged['nginx_config'])
 
         messages = [
+            '',
             '#' * 80,
-            '# Installation instructions ...',
+            ' Installation instructions ...',
             '#' * 80,
             'ln -s {uwsgi_config} {uwsgi_vassals}'.format(**merged),
         ]
@@ -151,6 +152,29 @@ class Wolfication(object):
         else:
             messages.append(
                 'ln -s {nginx_config} {nginx_conf_d}'.format(**merged))
+
+        messages.append('')
+        for msg in messages:
+            self.log.info(msg)
+
+    def instructor_initialisation(self):
+        messages = [
+            ''
+            '~' * 80,
+            ' Project initialisation instructions ...',
+            '~'  * 80,
+            'cd "{project_root:s}" && virtualenv -p python3 venv'.format(
+                **self.template_args),
+            'git init',
+            '. "{project_root:s}/venv/bin/activate"'.format(
+                **self.template_args),
+            'pip install -r "{project_root:s}/requirements.txt"'.format(
+                **self.template_args),
+            'coshed-bundy {app_name:s} '
+            '&& python "{project_root:s}/{app_name:s}.py"'.format(
+                **self.template_args),
+            'git add . && git commit -am "initial commit"'
+            ]
 
         for msg in messages:
             self.log.info(msg)
@@ -171,13 +195,11 @@ class Wolfication(object):
                     os.makedirs(root_dir)
 
         for rel_path, content in six.iteritems(TEMPLATES_CONTENT):
-            abs_path = os.path.join(self.template_args['templates_root'],
-                                    rel_path)
+            abs_path = rel_path.format(**self.template_args)
 
             if not os.path.isfile(abs_path):
-                rel_folder = os.path.dirname(rel_path)
-                abs_folder = os.path.join(self.template_args['templates_root'],
-                                          rel_folder)
+                abs_folder = os.path.dirname(abs_path)
+
                 if self.dry_run:
                     self.log.info("WOULD create {!s}".format(abs_folder))
                 else:
@@ -186,8 +208,11 @@ class Wolfication(object):
             if self.dry_run:
                 self.log.info("WOULD write  {!s}".format(abs_path))
             else:
-                with open(abs_path, "w") as tgt:
-                    tgt.write(content)
+                if not os.path.isfile or self.template_args['force']:
+                    with open(abs_path, "w") as tgt:
+                        tgt.write(content)
+                else:
+                    self.log.warning("NOT overwriting {!s}".format(abs_path))
 
     def persist(self):
         if self.do_init:
@@ -219,7 +244,10 @@ class Wolfication(object):
             if not os.path.isdir(target_parent):
                 os.makedirs(target_parent)
             self._dump(target, func(), overwrite=self.template_args['force'])
-        self.instructor(spec, self.template_args['configuration_folders'])
+        self.instructor_install(spec, self.template_args['configuration_folders'])
+
+        if self.do_init:
+            self.instructor_initialisation()
 
 
 def cli_stub():
