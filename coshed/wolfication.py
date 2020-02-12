@@ -208,7 +208,7 @@ class Wolfication(object):
             if self.dry_run:
                 self.log.info("WOULD write  {!s}".format(abs_path))
             else:
-                if not os.path.isfile or self.template_args['force']:
+                if not os.path.isfile(abs_path) or self.template_args['force']:
                     with open(abs_path, "w") as tgt:
                         tgt.write(content)
                 else:
