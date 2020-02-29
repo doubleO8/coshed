@@ -17,7 +17,7 @@ import logging
 import re
 
 import six
-from coshed.tools import load_json
+from coshed.tools import load_json, next_best_specification_source
 
 PATTERN_VALID_APP_NAME = r'[a-z]+[a-z0-9\-\_]*[a-z0-9]+'
 REGEX_VALID_APP_NAME = re.compile(PATTERN_VALID_APP_NAME, re.I)
@@ -209,7 +209,12 @@ def cli_stub(**kwargs):
 
     cli_args = parser.parse_args()
 
-    source_specification = load_json(cli_args.source_path)
+    source_specification_path = next_best_specification_source(
+        cli_args.source_path, app_name=cli_args.app_name
+    )
+    LOG.info("Using source specification {!r}".format(source_specification_path))
+
+    source_specification = load_json(source_specification_path)
     try:
         source_specification['_static']
     except KeyError:
