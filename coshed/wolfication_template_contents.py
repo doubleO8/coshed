@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 
-site_conf = """
-server {
+site_conf = """server {
     access_log /var/log/nginx/{{ app_name }}-access.log combined;
     error_log  /var/log/nginx/{{ app_name }}-error.log info;
 
@@ -44,8 +43,7 @@ server {
 }
 """
 
-app_ini = """
-[uwsgi]
+app_ini = """[uwsgi]
 processes = 2
 uid = www-data
 
@@ -68,8 +66,7 @@ logto = /var/log/uwsgi/vassals/%n.log
 plugins = {{ uwsgi_plugin|default('python3') }}
 """
 
-skeletor_py = '''
-#!/usr/bin/env python
+skeletor_py = '''#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Web app skeleton
@@ -133,8 +130,7 @@ if __name__ == '__main__':
     app.run(host=bind_address, port=port, debug=DEBUG_FLAG)
 '''
 
-requirements_txt = """
-requests>=2.13.0
+requirements_txt = """requests>=2.13.0
 pendulum==2.0.5
 future==0.18.2
 six==1.13.0
@@ -146,8 +142,7 @@ coshed>=0.5.0
 cachelib==0.1
 """
 
-gitignore = """
-.DS_Store
+gitignore = """.DS_Store
 ._*
 *.py[cod]
 /.idea
@@ -164,8 +159,7 @@ gitignore = """
 /*.egg-info
 """
 
-cfignore = """
-/contrib
+cfignore = """/contrib
 """
 
 spec_empty = {
