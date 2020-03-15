@@ -20,10 +20,6 @@ from coshed.wolfication_template_contents import TEMPLATES_CONTENT
 
 PATH_KEYS = ('project_root', 'app_root', 'static_folder')
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-
 TEMPLATE_ARGS_DEFAULTS = dict(
     app_root=os.path.abspath(os.getcwd()),
     brand_name=None,
