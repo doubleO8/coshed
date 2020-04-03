@@ -35,6 +35,7 @@ setup(
         'console_scripts': [
             'coshed-bundy = coshed.bundy:cli_stub',
             'coshed-wolfication = coshed.wolfication:cli_stub',
+            'coshed-calve = coshed.calving:cli_stub',
         ]
     }
 )

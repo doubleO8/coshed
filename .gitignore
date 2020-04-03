@@ -17,3 +17,4 @@
 /contrib/uwsgi-emperor
 /static
 /*.egg-info
+/calve.py
