@@ -230,8 +230,6 @@ def cli_stub(**kwargs):
 
     source_specification_path = next_best_specification_source(
         cli_args.source_path, app_name=cli_args.app_name,
-        _force=cli_args.force,
-        _sassy_path=cli_args.sassy_path
     )
     LOG.info("Using source specification {!r}".format(source_specification_path))
 
@@ -240,6 +238,9 @@ def cli_stub(**kwargs):
         source_specification['_static']
     except KeyError:
         source_specification['_static'] = os.path.dirname(cli_args.source_path)
+
+    source_specification['_force'] = cli_args.force,
+    source_specification['_sassy_path'] = cli_args.sassy_path
 
     if cli_args.app_name:
         if re.match(REGEX_VALID_APP_NAME, cli_args.app_name):
