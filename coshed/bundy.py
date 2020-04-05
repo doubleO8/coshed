@@ -18,6 +18,7 @@ import re
 
 import six
 from coshed.tools import load_json, next_best_specification_source
+from coshed.sassy_glue import SassyController
 
 PATTERN_VALID_APP_NAME = r'[a-z]+[a-z0-9\-\_]*[a-z0-9]+'
 REGEX_VALID_APP_NAME = re.compile(PATTERN_VALID_APP_NAME, re.I)
@@ -115,6 +116,7 @@ def export_index(index_path, assets):
 def bundle(source_specification, index_path=None, app_name=None):
     assets = dict()
     root_path = source_specification['_static']
+    sassy_path = source_specification.get('_sassy_path')
 
     if index_path is None:
         index_path = os.path.join(root_path, "index.json")
@@ -126,6 +128,16 @@ def bundle(source_specification, index_path=None, app_name=None):
     LOG.info("'static files' root path: {!s}".format(
         source_specification['_static']))
     LOG.info("index path: {!s}".format(index_path))
+    LOG.info("sassy path: {!s}".format(sassy_path))
+
+    if sassy_path and os.path.isdir(sassy_path):
+        LOG.info("sassy path: {!s}".format(sassy_path))
+        sc = SassyController(sassy_path, os.path.join(root_path, 'css'))
+        try:
+            sc.run(force=source_specification.get('_force', False))
+        except Exception as exc:
+            LOG.warning("Failed SASS compile!")
+            LOG.warning(exc)
 
     if os.path.isfile(index_path):
         remove_old_combined(index_path, root_path=root_path)
@@ -166,10 +178,11 @@ def cli_stub(**kwargs):
         source_path=os.path.join(
             os.getcwd(), 'static/wolfication_specification.json'
         ),
-        uwsgi_config_path=os.path.join(os.getcwd(), 'contrib/uwsgi-emperor/')
+        uwsgi_config_path=os.path.join(os.getcwd(), 'contrib/uwsgi-emperor/'),
+        sassy_path=os.path.join(os.getcwd(), 'sassy'),
     )
-
-    for kw_key in ("source_path", "uwsgi_config_path", "index_path"):
+    kw_keys = ("source_path", "uwsgi_config_path", "index_path" ,"sassy_path")
+    for kw_key in kw_keys:
         val = kwargs.get(kw_key)
         if val is not None:
             defaults[kw_key] = val
@@ -183,14 +196,20 @@ def cli_stub(**kwargs):
     #     dest="dry_run",
     #     default=False, help="Dry run mode")
 
-    # parser.add_argument(
-    #     '-f', '--force', action='store_true',
-    #     dest="force",
-    #     default=False, help="force mode (overwrites stuff etc.)")
+    parser.add_argument(
+         '-f', '--force', action='store_true',
+         dest="force",
+         default=False, help="force mode (overwrites stuff etc.)")
 
     parser.add_argument(
         '-s', '--specification-source', default=defaults['source_path'],
         help="Sources specification. Default: %(default)s", dest="source_path",
+        metavar="PATH"
+    )
+
+    parser.add_argument(
+        '-a', '--sassy', default=defaults['sassy_path'],
+        help="Sassy sources. Default: %(default)s", dest="sassy_path",
         metavar="PATH"
     )
 
@@ -210,7 +229,9 @@ def cli_stub(**kwargs):
     cli_args = parser.parse_args()
 
     source_specification_path = next_best_specification_source(
-        cli_args.source_path, app_name=cli_args.app_name
+        cli_args.source_path, app_name=cli_args.app_name,
+        _force=cli_args.force,
+        _sassy_path=cli_args.sassy_path
     )
     LOG.info("Using source specification {!r}".format(source_specification_path))
 
