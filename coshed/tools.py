@@ -1,17 +1,83 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+import sys
+import logging
+import traceback
 import json
+import codecs
+
+
+def log_traceback(message, exception, uselog=None):
+    """
+    Use *uselog* Logger to log a Traceback of exception *exception*.
+
+    Args:
+        message(str): message to be logged before trace log items
+        exception(Exception): exception to be logged
+        uselog(logging.Logger, optional): logger instance override
+        
+    """
+    if uselog is None:
+        uselog = logging.getLogger(__name__)
+    e_type, e_value, e_traceback = sys.exc_info()
+
+    uselog.warning(message)
+    uselog.error(exception)
+
+    for line in traceback.format_exception(e_type, e_value, e_traceback):
+        for part in line.strip().split("\n"):
+            if part != '':
+                uselog.warning(part)
+
+
+def dump_json(data, uselog=None, level=logging.INFO):
+    """
+    Log ``data`` in JSON format
+
+    Args:
+        data: data
+        uselog(logging.Logger, optional): logger instance override
+        level: logging level
+
+    """
+    if uselog is None:
+        uselog = logging.getLogger(__name__)
+
+    for line in json.dumps(data, indent=2).split("\n"):
+        uselog.log(level, line)
 
 
 def load_json(path):
     """
     Load JSON encoded file and return its contents.
+    
+    Args:
+        path(str): path
+    
+    Returns:
+        object: parsed content
+
     """
     with open(path, "r") as src:
         content = json.load(src)
 
     return content
+
+
+def persist_json(data, path, indent=None, sort_keys=False):
+    """
+    Persist ``data`` in JSON format to ``path``.
+
+    Args:
+        data: data
+        path: file path
+        indent (int, optional): indent
+        sort_keys (bool, optional): do sort keys
+
+    """
+    with codecs.open(path, "wb", 'utf-8') as tgt:
+        json.dump(data, tgt, indent=indent, sort_keys=sort_keys)
 
 
 def next_best_specification_source(fallback, app_name=None, root_path=None,
