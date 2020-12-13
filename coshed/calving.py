@@ -32,7 +32,7 @@ VERSIONING_SCHEME_CALVER = 'calver'
 
 VERSIONING_SCHEME_SEMANTIC = 'semantic'
 
-SEMANTIC_AUTO_INCREMENT_FIELD = 'minor'
+SEMANTIC_AUTO_INCREMENT_FIELD = 'patch'
 
 #: Format string for 'current' to 'next' tag bump
 CURRENT_NEXT = '''
