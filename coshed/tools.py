@@ -7,6 +7,8 @@ import traceback
 import json
 import codecs
 
+import pendulum
+
 
 def log_traceback(message, exception, uselog=None):
     """
@@ -139,3 +141,55 @@ def next_best_asset_source(fallback, app_name=None, root_path=None):
     """
     return next_best_specification_source(fallback, app_name=app_name,
                                           root_path=root_path, trunk="index")
+
+
+def period_object(period):
+    """
+    Convert *period* to  a ``pendulum.Period`` object if needed and possible.
+
+    Args:
+        period: input data
+
+    Returns:
+        period (pendulum.Period): period object
+    """
+    if isinstance(period, dict):
+        try:
+            try:
+                return pendulum.Period(
+                    pendulum.parse(period['begin']),
+                    pendulum.parse(period['end']),
+                )
+            except KeyError:
+                return pendulum.Period(
+                    pendulum.parse(period['start']),  # allowing also 'start'
+                    pendulum.parse(period['end']),
+                )
+        except KeyError:
+            raise ValueError(
+                "Cannot make a period object out of {!r}".format(period))
+    elif isinstance(period, pendulum.Period):
+        return period
+
+    raise ValueError(
+        "Cannot make a period object out of {!r}".format(period))
+
+
+def period_json(period):
+    """
+    Convert a ``pendulum.Period`` object to a JSON serialisable dict.
+
+    Args:
+        period (pendulum.Period): period object
+
+    Returns:
+        dict: period specification
+    """
+    if isinstance(period, dict):
+        period = period_object(period)
+
+    return {
+        "total_seconds": period.total_seconds(),
+        "begin": period.start.to_iso8601_string(),
+        "end": period.end.to_iso8601_string(),
+    }
