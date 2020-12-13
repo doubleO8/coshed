@@ -86,8 +86,10 @@ def wolfication(flask_app_instance, **kwargs):
     Compress(flask_app_instance)
 
     if kwargs.get("app_name"):
-        log_kwargs = dict(maxBytes=kwargs.get("maxBytes"),
-                          backupCount=kwargs.get("backupCount"))
+        log_kwargs = dict(
+            maxBytes=kwargs.get("maxBytes", ROTATING_LOG_MAX_BYTES),
+            backupCount=kwargs.get("backupCount", ROTATING_LOG_BACKUP_COUNT)
+        )
         rotating_app_log(flask_app_instance,
                          kwargs.get("app_name"), **log_kwargs)
 
