@@ -8,4 +8,4 @@ Flask>=1.1.1
 Flask-Compress>=1.4.0
 Flask-Cors>=3.0.7
 cachelib>=0.1
-transitions==0.8.2
+transitions>=0.8.2
