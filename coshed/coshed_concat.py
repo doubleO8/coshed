@@ -21,6 +21,7 @@ CSS_HTML_JS_MINIFY_CALL = '{binary} "{filename}"'
 CLOSURE_COMPILER_CALL = '{binary} --compilation_level {compilation_level} ' \
                         '"{filename}" --js_output_file "{js_output_file}"'
 
+
 class CoshedConcat(object):
     def __init__(self, filenames, trunk_template, **kwargs):
         self.sources = filenames
@@ -107,6 +108,7 @@ class CoshedConcat(object):
 
         return os.path.abspath(target)
 
+
 class CoshedConcatMinifiedJS(CoshedConcat):
     def __init__(self, filenames, trunk_template, **kwargs):
         CoshedConcat.__init__(self, filenames, trunk_template, **kwargs)
@@ -175,6 +177,7 @@ class CoshedConcatClosure(CoshedConcat):
             self.tmp_target = out_target
 
         return rc
+
 
 if __name__ == '__main__':
     import doctest
