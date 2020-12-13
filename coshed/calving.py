@@ -32,6 +32,8 @@ VERSIONING_SCHEME_CALVER = 'calver'
 
 VERSIONING_SCHEME_SEMANTIC = 'semantic'
 
+SEMANTIC_AUTO_INCREMENT_FIELD = 'minor'
+
 #: Format string for 'current' to 'next' tag bump
 CURRENT_NEXT = '''
         Example: current tag {current!r} will be followed by {next!r}.
@@ -135,8 +137,8 @@ def semver_next(use_log=None, cli_args=None):
     use_log.debug('%s', 'inc_keys={!r}'.format(inc_keys))
 
     if len(inc_keys) == 0:
-        increment['build'] = 1
-        inc_keys.append('build')
+        increment[SEMANTIC_AUTO_INCREMENT_FIELD] = 1
+        inc_keys.append(SEMANTIC_AUTO_INCREMENT_FIELD)
     elif len(inc_keys) > 1:
         raise ValueError("Only one of {!r} may be altered at once".format(
             PORTIONS))
