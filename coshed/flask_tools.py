@@ -62,10 +62,11 @@ def wolfication(flask_app_instance, **kwargs):
         flask_app_instance (flask.Flask): flask instance
 
     Keyword Args:
-        jinja_filters (dict): jinja filters to be installed
-        app_name (str): application name
-        maxBytes (int): maximum bytes threshold for log rollover
-        backupCount (int): maximum number of log rotations to keep
+        jinja_filters (dict, optional): jinja filters to be installed
+        app_name (str, optional): application name
+        maxBytes (int, optional): maximum bytes threshold for log rollover
+        backupCount (int, optional): maximum number of log rotations to keep
+        config (dict, optional): configuration overrides
 
     Returns:
         flask.Flask: flask instance
@@ -75,6 +76,9 @@ def wolfication(flask_app_instance, **kwargs):
     flask_app_instance.jinja_env.strip_trailing_newlines = True
     flask_app_instance.config['SEND_FILE_MAX_AGE_DEFAULT'] = 24 * 3600 * 365
     flask_app_instance.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+
+    if kwargs.get("config"):
+        flask_app_instance.config.update(kwargs.get("config"))
 
     if kwargs.get("jinja_filters"):
         jinja_filters = kwargs.get("jinja_filters")
