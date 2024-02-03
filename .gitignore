@@ -19,3 +19,4 @@
 /static
 /*.egg-info
 /calve.py
+.envrc
