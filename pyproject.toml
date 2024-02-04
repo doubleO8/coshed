@@ -20,7 +20,7 @@ exclude = '''
 
 [tool.poetry]
 name = "coshed"
-version = "0.12.3"
+version = "0.13.0"
 description = "Project deployment and distribution tools for lazy developers"
 authors = ["doubleO8 <wb008@hdm-stuttgart.de>"]
 license = "GPL-2.0-only"
@@ -33,12 +33,12 @@ requests = ">=2.13.0"
 pendulum = "^2.1"
 future = ">=0.18.2"
 six = ">=1.13.0"
-Jinja2 = "^2.10.3"
-Flask = "^1.1.1"
-Flask-Compress = "^1.4.0"
-Flask-Cors = "^3.0.7"
+Flask = "^3.0.2"
+Flask-Compress = "^1.14"
+Flask-Cors = "^4.0.0"
 cachelib = ">=0.1"
 transitions = "^0.8.2"
+flask-httpauth = "^4.8.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
