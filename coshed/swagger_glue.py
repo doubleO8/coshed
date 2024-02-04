@@ -21,9 +21,10 @@ def next_best_swagger_in_source(swagger_root_path, app_name=None):
 
     if app_name:
         swagger_in_candidates.append(
-            'swagger.{app_name}.in.json'.format(app_name=app_name))
+            "swagger.{app_name}.in.json".format(app_name=app_name)
+        )
 
-    swagger_in_candidates.append('swagger.in.json')
+    swagger_in_candidates.append("swagger.in.json")
 
     for candy in swagger_in_candidates:
         candy_path = os.path.join(swagger_root_path, candy)

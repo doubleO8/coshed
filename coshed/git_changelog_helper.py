@@ -16,17 +16,21 @@ from subprocess import PIPE, Popen
 import copy
 
 #: regular expression for 'official' tags
-OFFICIAL_TAG_RE = re.compile(r'^(?P<major>\d+)\.(?P<minor>\d+)'
-                             r'\.(?P<patch>\d+)(\.(?P<build>\d+))?'
-                             r'(\-(?P<git_describe>[\d\w\-]+))?$')
+OFFICIAL_TAG_RE = re.compile(
+    r"^(?P<major>\d+)\.(?P<minor>\d+)"
+    r"\.(?P<patch>\d+)(\.(?P<build>\d+))?"
+    r"(\-(?P<git_describe>[\d\w\-]+))?$"
+)
 
 #: regular expression for changelog entries
-LOG_RE = re.compile(r'^\[(?P<tag>.*?)\] (?P<hash>[\w\d]+) '
-                    r'(?P<date>\d{4}\-\d{2}\-\d{2}) \[(?P<author>.*?)\] '
-                    r'(?P<msg>.*?)$')
+LOG_RE = re.compile(
+    r"^\[(?P<tag>.*?)\] (?P<hash>[\w\d]+) "
+    r"(?P<date>\d{4}\-\d{2}\-\d{2}) \[(?P<author>.*?)\] "
+    r"(?P<msg>.*?)$"
+)
 
 #: regular expression for entries to be considered as 'junk'
-MSG_JUNK_RE = re.compile(r'^git\-svn\-id\:|^[\s\.]+$')
+MSG_JUNK_RE = re.compile(r"^git\-svn\-id\:|^[\s\.]+$")
 
 #: changelog file lines format
 OUTPUT_LOG_FORMAT = "%(date)s %(author)s %(ver)-9s %(hash)s %(msg)s"
@@ -51,8 +55,12 @@ def git_current_tag(raw=False):
     >>> git_current_tag(True) == git_current_tag()[0]
     True
     """
-    lines = Popen("git describe",
-                  shell=True, stdout=PIPE).communicate()[0].decode('utf-8').split("\n")
+    lines = (
+        Popen("git describe", shell=True, stdout=PIPE)
+        .communicate()[0]
+        .decode("utf-8")
+        .split("\n")
+    )
     if raw is True:
         return lines[0]
     return lines[0].split("-", 1)
@@ -74,8 +82,12 @@ def git_tag_tuple(line=None):
     m = re.match(OFFICIAL_TAG_RE, line)
     if m:
         gdict = git_tag_dict(line)
-        return (gdict.get("major"), gdict.get("minor"), gdict.get("patch"),
-                gdict.get("build"))
+        return (
+            gdict.get("major"),
+            gdict.get("minor"),
+            gdict.get("patch"),
+            gdict.get("build"),
+        )
     return None
 
 
@@ -125,8 +137,11 @@ def git_tag_dict(line=None):
 def git_official_tags():
     otags = list()
 
-    lines = Popen("git tag -l", shell=True,
-                  stdout=PIPE).communicate()[0].split("\n")
+    lines = (
+        Popen("git tag -l", shell=True, stdout=PIPE)
+        .communicate()[0]
+        .split("\n")
+    )
     for line in lines:
         tag_tuple = git_tag_tuple(line)
         if tag_tuple:
@@ -137,8 +152,11 @@ def git_official_tags():
 def git_official_tags_raw():
     otags = list()
 
-    lines = Popen("git tag -l", shell=True,
-                  stdout=PIPE).communicate()[0].split("\n")
+    lines = (
+        Popen("git tag -l", shell=True, stdout=PIPE)
+        .communicate()[0]
+        .split("\n")
+    )
     for line in lines:
         m = re.match(OFFICIAL_TAG_RE, line)
         if m:
@@ -171,12 +189,13 @@ def git_tag_string(tag_dict, plain_int=False):
     parts = ["{major:d}.{minor:d}.{patch:d}".format(**tag_dict)]
     if tag_dict.get("build"):
         parts.append(
-            (plain_int and "{build:d}" or "{build:03d}").format(**tag_dict))
-    return '.'.join(parts)
+            (plain_int and "{build:d}" or "{build:03d}").format(**tag_dict)
+        )
+    return ".".join(parts)
 
 
 def git_official_tag_property(tag_tuple):
-    for (key, val) in zip(('major', 'minor', 'patch', 'build'), tag_tuple):
+    for (key, val) in zip(("major", "minor", "patch", "build"), tag_tuple):
         print("build.{:s}={:d}".format(key, val))
 
 
@@ -228,7 +247,7 @@ def cmp_versions(version_a, version_b, verbose=0):
             result = 23
         LOG.debug("{:s} VS {:s}: {:>3d}".format(version_a, version_b, result))
 
-    key_list = ['major', 'minor', 'patch']
+    key_list = ["major", "minor", "patch"]
     cmp_value_a = 0
     cmp_value_b = 0
 
@@ -248,14 +267,20 @@ def cmp_versions(version_a, version_b, verbose=0):
             pass
 
         if verbose > 3:
-            LOG.debug("[a] {:s}={:>3d} ({:>5d})".format(key, value_a,
-                                                        value_a * pot ** i))
-            LOG.debug("[b] {:s}={:>3d} ({:>5d})".format(key, value_b,
-                                                        value_b * pot ** i))
+            LOG.debug(
+                "[a] {:s}={:>3d} ({:>5d})".format(
+                    key, value_a, value_a * pot**i
+                )
+            )
+            LOG.debug(
+                "[b] {:s}={:>3d} ({:>5d})".format(
+                    key, value_b, value_b * pot**i
+                )
+            )
 
         i += 1
-        cmp_value_a += value_a * pot ** i
-        cmp_value_b += value_b * pot ** i
+        cmp_value_a += value_a * pot**i
+        cmp_value_b += value_b * pot**i
 
     i_result = cmp(cmp_value_a, cmp_value_b)
     LOG.debug("{!s} VS {!s}: {:>3d}".format(version_a, version_b, i_result))
@@ -298,7 +323,7 @@ def format_changelog(lines, max_version=None):
                 val = 0
             gdict[key] = int(val)
 
-        gdict['ver'] = "%(major)d.%(minor)d.%(patch)d.%(build)03d" % gdict
+        gdict["ver"] = "%(major)d.%(minor)d.%(patch)d.%(build)03d" % gdict
         sort_key = "%(major)04d.%(minor)04d.%(patch)04d.%(build)04d" % gdict
         try:
             log_map[sort_key].append(gdict)
@@ -311,10 +336,10 @@ def format_changelog(lines, max_version=None):
         if max_version and len(log_map[key]) > 0:
             some_tag_version = log_map[key][0]
             if cmp_versions(max_version, some_tag_version) == -1:
-                LOG.error("Too recent: {!r}".format(some_tag_version['ver']))
+                LOG.error("Too recent: {!r}".format(some_tag_version["ver"]))
                 continue
 
-        print("[{:s}]".format(log_map[key][0]['tag']))
+        print("[{:s}]".format(log_map[key][0]["tag"]))
         for log_data in log_map[key]:
             print(OUTPUT_LOG_FORMAT % log_data)
         print("")
@@ -352,7 +377,7 @@ def alter_tag(current_tag, **increment):
     return next_tag
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     (FAILED, SUCCEEDED) = doctest.testmod()

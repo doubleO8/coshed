@@ -6,7 +6,7 @@ from builtins import str
 from past.builtins import basestring
 
 
-def to_unicode_or_bust(obj, encoding='utf-8'):
+def to_unicode_or_bust(obj, encoding="utf-8"):
     """
     Convert string *obj* to unicode.
     *obj* is left alone if it is not string instance.

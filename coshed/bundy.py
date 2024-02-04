@@ -20,7 +20,7 @@ import six
 from coshed.tools import load_json, next_best_specification_source
 from coshed.sassy_glue import SassyController
 
-PATTERN_VALID_APP_NAME = r'[a-z]+[a-z0-9\-\_]*[a-z0-9]+'
+PATTERN_VALID_APP_NAME = r"[a-z]+[a-z0-9\-\_]*[a-z0-9]+"
 REGEX_VALID_APP_NAME = re.compile(PATTERN_VALID_APP_NAME, re.I)
 
 LOG = logging.getLogger(__name__)
@@ -54,38 +54,39 @@ def combine(sources, root_path, trunk=None):
         LOG.debug("  + {!s}".format(source))
         included_sources += 1
 
-        with codecs.open(source, "rb", 'utf-8') as src:
-            chunk = src.read(1024).replace('sourceMappingURL', '')
+        with codecs.open(source, "rb", "utf-8") as src:
+            chunk = src.read(1024).replace("sourceMappingURL", "")
             while chunk:
                 content.write(chunk)
-                hash_cookie.update(chunk.encode('utf-8'))
-                chunk = src.read(1024).replace('sourceMappingURL', '')
+                hash_cookie.update(chunk.encode("utf-8"))
+                chunk = src.read(1024).replace("sourceMappingURL", "")
 
         try:
             content.write(source_end)
         except TypeError:
             content.write(unicode(source_end))
-        hash_cookie.update(source_end.encode('utf-8'))
+        hash_cookie.update(source_end.encode("utf-8"))
 
-    filename = '{trunk}-{hexdigest}{ext}'.format(
-        trunk=trunk, hexdigest=hash_cookie.hexdigest(), ext=ext)
+    filename = "{trunk}-{hexdigest}{ext}".format(
+        trunk=trunk, hexdigest=hash_cookie.hexdigest(), ext=ext
+    )
     target = os.path.join(folder, filename)
     content.seek(0)
 
     if included_sources:
         LOG.info(" ... {!s}".format(target))
 
-        with codecs.open(target, "wb", 'utf-8') as tgt:
+        with codecs.open(target, "wb", "utf-8") as tgt:
             tgt.write(content.read())
     else:
         LOG.info(" ... NO CONTENT.")
         raise ValueError("No content")
 
-    return os.path.relpath(target, root_path).replace("\\", '/')
+    return os.path.relpath(target, root_path).replace("\\", "/")
 
 
 def remove_old_combined(index_path, root_path):
-    with codecs.open(index_path, "rb", 'utf-8') as src:
+    with codecs.open(index_path, "rb", "utf-8") as src:
         source_specification = json.load(src)
 
     delete_me = list()
@@ -109,32 +110,36 @@ def remove_old_combined(index_path, root_path):
 
 
 def export_index(index_path, assets):
-    with codecs.open(index_path, "wb", 'utf-8') as tgt:
+    with codecs.open(index_path, "wb", "utf-8") as tgt:
         json.dump(assets, tgt, indent=2, sort_keys=True)
 
 
 def bundle(source_specification, index_path=None, app_name=None):
     assets = dict()
-    root_path = source_specification['_static']
-    sassy_path = source_specification.get('_sassy_path')
+    root_path = source_specification["_static"]
+    sassy_path = source_specification.get("_sassy_path")
 
     if index_path is None:
         index_path = os.path.join(root_path, "index.json")
 
         if app_name:
             index_path = os.path.join(
-                root_path, "index.{:s}.json".format(app_name))
+                root_path, "index.{:s}.json".format(app_name)
+            )
 
-    LOG.info("'static files' root path: {!s}".format(
-        source_specification['_static']))
+    LOG.info(
+        "'static files' root path: {!s}".format(
+            source_specification["_static"]
+        )
+    )
     LOG.info("index path: {!s}".format(index_path))
     LOG.info("sassy path: {!s}".format(sassy_path))
 
     if sassy_path and os.path.isdir(sassy_path):
         LOG.info("sassy path: {!s}".format(sassy_path))
-        sc = SassyController(sassy_path, os.path.join(root_path, 'css'))
+        sc = SassyController(sassy_path, os.path.join(root_path, "css"))
         try:
-            sc.run(force=source_specification.get('_force', False))
+            sc.run(force=source_specification.get("_force", False))
         except Exception as exc:
             LOG.warning("Failed SASS compile!")
             LOG.warning(exc)
@@ -145,7 +150,7 @@ def bundle(source_specification, index_path=None, app_name=None):
     for root in source_specification:
         asset_items = dict()
 
-        if root.startswith('_'):
+        if root.startswith("_"):
             continue
 
         for item_key in source_specification[root]:
@@ -153,11 +158,12 @@ def bundle(source_specification, index_path=None, app_name=None):
             items = source_specification[root][item_key]
 
             if app_name:
-                trunk = '.'.join((item_key, app_name))
+                trunk = ".".join((item_key, app_name))
 
             try:
-                items_combined = combine(items,
-                                         trunk=trunk, root_path=root_path)
+                items_combined = combine(
+                    items, trunk=trunk, root_path=root_path
+                )
             except ValueError as vexc:
                 LOG.warning(vexc)
                 continue
@@ -176,20 +182,21 @@ def cli_stub(**kwargs):
     description = "Web application bundling"
     defaults = dict(
         source_path=os.path.join(
-            os.getcwd(), 'static/wolfication_specification.json'
+            os.getcwd(), "static/wolfication_specification.json"
         ),
-        uwsgi_config_path=os.path.join(os.getcwd(), 'contrib/uwsgi-emperor/'),
-        sassy_path=os.path.join(os.getcwd(), 'sassy'),
+        uwsgi_config_path=os.path.join(os.getcwd(), "contrib/uwsgi-emperor/"),
+        sassy_path=os.path.join(os.getcwd(), "sassy"),
     )
-    kw_keys = ("source_path", "uwsgi_config_path", "index_path" ,"sassy_path")
+    kw_keys = ("source_path", "uwsgi_config_path", "index_path", "sassy_path")
     for kw_key in kw_keys:
         val = kwargs.get(kw_key)
         if val is not None:
             defaults[kw_key] = val
 
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('app_name', metavar='APP',
-                        help='web application name', nargs='?')
+    parser.add_argument(
+        "app_name", metavar="APP", help="web application name", nargs="?"
+    )
 
     # parser.add_argument(
     #     '-n', '--dry-run', action='store_true',
@@ -197,62 +204,84 @@ def cli_stub(**kwargs):
     #     default=False, help="Dry run mode")
 
     parser.add_argument(
-         '-f', '--force', action='store_true',
-         dest="force",
-         default=False, help="force mode (overwrites stuff etc.)")
-
-    parser.add_argument(
-        '-s', '--specification-source', default=defaults['source_path'],
-        help="Sources specification. Default: %(default)s", dest="source_path",
-        metavar="PATH"
+        "-f",
+        "--force",
+        action="store_true",
+        dest="force",
+        default=False,
+        help="force mode (overwrites stuff etc.)",
     )
 
     parser.add_argument(
-        '-a', '--sassy', default=defaults['sassy_path'],
-        help="Sassy sources. Default: %(default)s", dest="sassy_path",
-        metavar="PATH"
+        "-s",
+        "--specification-source",
+        default=defaults["source_path"],
+        help="Sources specification. Default: %(default)s",
+        dest="source_path",
+        metavar="PATH",
     )
 
     parser.add_argument(
-        '-i', '--assets-index', default=None,
-        help="Assets index path", dest="index_path",
-        metavar="PATH"
+        "-a",
+        "--sassy",
+        default=defaults["sassy_path"],
+        help="Sassy sources. Default: %(default)s",
+        dest="sassy_path",
+        metavar="PATH",
     )
 
     parser.add_argument(
-        '-u', '--uwsgi-configuration-path',
-        default=defaults['uwsgi_config_path'],
+        "-i",
+        "--assets-index",
+        default=None,
+        help="Assets index path",
+        dest="index_path",
+        metavar="PATH",
+    )
+
+    parser.add_argument(
+        "-u",
+        "--uwsgi-configuration-path",
+        default=defaults["uwsgi_config_path"],
         help="uWSGI configuration path. Default: %(default)s",
-        dest="uwsgi_config_path", metavar="PATH"
+        dest="uwsgi_config_path",
+        metavar="PATH",
     )
 
     cli_args = parser.parse_args()
 
     source_specification_path = next_best_specification_source(
-        cli_args.source_path, app_name=cli_args.app_name,
+        cli_args.source_path,
+        app_name=cli_args.app_name,
     )
-    LOG.info("Using source specification {!r}".format(source_specification_path))
+    LOG.info(
+        "Using source specification {!r}".format(source_specification_path)
+    )
 
     source_specification = load_json(source_specification_path)
     try:
-        source_specification['_static']
+        source_specification["_static"]
     except KeyError:
-        source_specification['_static'] = os.path.dirname(cli_args.source_path)
+        source_specification["_static"] = os.path.dirname(cli_args.source_path)
 
-    source_specification['_force'] = cli_args.force,
-    source_specification['_sassy_path'] = cli_args.sassy_path
+    source_specification["_force"] = (cli_args.force,)
+    source_specification["_sassy_path"] = cli_args.sassy_path
 
     if cli_args.app_name:
         if re.match(REGEX_VALID_APP_NAME, cli_args.app_name):
             app_name = cli_args.app_name
         else:
-            LOG.warning("Invalid app name {!r}, "
-                        "valid names regular expression is {!s}".format(
-                cli_args.app_name, PATTERN_VALID_APP_NAME))
+            LOG.warning(
+                "Invalid app name {!r}, "
+                "valid names regular expression is {!s}".format(
+                    cli_args.app_name, PATTERN_VALID_APP_NAME
+                )
+            )
             raise ValueError("Invalid app name")
 
-    bundle(source_specification,
-           index_path=cli_args.index_path, app_name=app_name)
+    bundle(
+        source_specification, index_path=cli_args.index_path, app_name=app_name
+    )
 
     if os.path.isdir(cli_args.uwsgi_config_path):
         uwsgi_files = list()
@@ -260,13 +289,14 @@ def cli_stub(**kwargs):
         for item in os.listdir(cli_args.uwsgi_config_path):
             uwsgi_files.append(item)
 
-        if platform.system() != 'Linux':
+        if platform.system() != "Linux":
             LOG.warning("Crippled platform, skipping uWSGI magic")
         else:
             for uw_file in uwsgi_files:
                 args = [
-                    'touch',
+                    "touch",
                     os.path.abspath(
-                        os.path.join(cli_args.uwsgi_config_path, uw_file))
+                        os.path.join(cli_args.uwsgi_config_path, uw_file)
+                    ),
                 ]
                 subprocess.call(args)

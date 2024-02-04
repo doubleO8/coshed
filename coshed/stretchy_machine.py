@@ -9,10 +9,10 @@ try:
 except ImportError:
     print("I need the transitions package but will fail later.")
 
-STATE_S0 = 's0'
-STATE_OPEN = 'open'
-STATE_CLOSED = 'closed'
-STATE_DEAD = 'dead'
+STATE_S0 = "s0"
+STATE_OPEN = "open"
+STATE_CLOSED = "closed"
+STATE_DEAD = "dead"
 
 
 class StretchyMachineException(Exception):
@@ -28,10 +28,12 @@ class StretchyMachine(Machine):
         self.log.debug(
             "state={state:6s} current_value={current_value!s:16} "
             "#dt_objects={dt_objects_len:5d} #periods={periods_len:5d}".format(
-                state=self.state, current_value=self.current_value,
+                state=self.state,
+                current_value=self.current_value,
                 dt_objects_len=len(self.dt_objects),
-                periods_len=len(self.periods)
-            ))
+                periods_len=len(self.periods),
+            )
+        )
 
     def on_enter_open(self, *args, **kwargs):
         self.log.debug("ENTER OPEN")
@@ -40,28 +42,34 @@ class StretchyMachine(Machine):
 
         if dt_object:
             self.log.debug(
-                "+ {!r:10} {!r}".format(self.current_value, dt_object))
+                "+ {!r:10} {!r}".format(self.current_value, dt_object)
+            )
 
             if len(self.dt_objects):
                 if dt_object <= self.dt_objects[-1]:
                     self.log.warning(
-                        "{!r} <= {!r}".format(dt_object, self.dt_objects[-1]))
+                        "{!r} <= {!r}".format(dt_object, self.dt_objects[-1])
+                    )
             self.dt_objects.append(dt_object)
 
         self.dump_state_of_the_onion()
-        self.log.debug('')
+        self.log.debug("")
 
     def on_exit_open(self, *args, **kwargs):
         self.log.debug("# EXIT OPEN")
         self.overhang_dt_object = kwargs.get(self.dt_key)
         if self.overhang_dt_object:
             self.log.debug(
-                "= {!r:10} {!r}".format(self.current_value,
-                                        self.overhang_dt_object))
+                "= {!r:10} {!r}".format(
+                    self.current_value, self.overhang_dt_object
+                )
+            )
 
     def _terminate_period(self):
         try:
-            current_p = pendulum.Period(self.dt_objects[0], self.dt_objects[-1])
+            current_p = pendulum.Period(
+                self.dt_objects[0], self.dt_objects[-1]
+            )
             self.periods.append((current_p, self.current_value))
         except Exception as exc:
             self.log.debug(exc)
@@ -83,14 +91,16 @@ class StretchyMachine(Machine):
 
         if self.overhang_dt_object:
             self.log.debug(
-                "! {!r:10} {!r}".format(self.current_value,
-                                        self.overhang_dt_object))
+                "! {!r:10} {!r}".format(
+                    self.current_value, self.overhang_dt_object
+                )
+            )
             self.dt_objects.append(self.overhang_dt_object)
             self.overhang_dt_object = None
 
         self.log.debug("v" * 80)
         self.dump_state_of_the_onion()
-        self.log.debug('')
+        self.log.debug("")
 
     def changed_value(self, *args, **kwargs):
         is_changed = self.current_value != kwargs.get(self.value_key)
@@ -132,29 +142,43 @@ class StretchyMachine(Machine):
         self.value_key = kwargs.get("value_key", "value")
         self.required_payload_keys = (self.dt_key, self.value_key)
 
-        self.add_transition('shovel', STATE_S0, STATE_OPEN,
-                            conditions=['have_payload'])
+        self.add_transition(
+            "shovel", STATE_S0, STATE_OPEN, conditions=["have_payload"]
+        )
 
-        self.add_transition('terminate', '*', STATE_DEAD)
+        self.add_transition("terminate", "*", STATE_DEAD)
 
-        self.add_transition('shovel', STATE_OPEN, STATE_CLOSED,
-                            conditions=['have_payload', 'changed_value'])
+        self.add_transition(
+            "shovel",
+            STATE_OPEN,
+            STATE_CLOSED,
+            conditions=["have_payload", "changed_value"],
+        )
 
-        self.add_transition('shovel', STATE_OPEN, STATE_OPEN,
-                            conditions=['have_payload', 'same_value'])
+        self.add_transition(
+            "shovel",
+            STATE_OPEN,
+            STATE_OPEN,
+            conditions=["have_payload", "same_value"],
+        )
 
-        self.add_transition('shovel', STATE_CLOSED, STATE_OPEN,
-                            conditions=['have_payload', 'changed_value'])
+        self.add_transition(
+            "shovel",
+            STATE_CLOSED,
+            STATE_OPEN,
+            conditions=["have_payload", "changed_value"],
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.basicConfig(
         # level=logging.DEBUG,
         level=logging.INFO,
-        format='%(asctime)s %(levelname)-8s %(message)s',
-        datefmt='%Y%m%d %H:%M:%S')
+        format="%(asctime)s %(levelname)-8s %(message)s",
+        datefmt="%Y%m%d %H:%M:%S",
+    )
 
-    logging.getLogger('transitions').setLevel(logging.FATAL)
+    logging.getLogger("transitions").setLevel(logging.FATAL)
     m = StretchyMachine()
 
     # m.terminate()

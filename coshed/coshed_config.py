@@ -21,10 +21,7 @@ class CoshedConfig(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self._data_sources = {
-            'environ': dict(),
-            'config': dict()
-        }
+        self._data_sources = {"environ": dict(), "config": dict()}
         self._sources_log = []
         self._key_set = None
         key_set = kwargs.get("keys")
@@ -49,8 +46,12 @@ class CoshedConfig(object):
 
         for key in kwargs:
             if key in (
-                    'defaults', 'coshfile', 'ro', 'keys',
-                    'environ_key_mapping'):
+                "defaults",
+                "coshfile",
+                "ro",
+                "keys",
+                "environ_key_mapping",
+            ):
                 continue
             source_value = kwargs[key]
             defaults[key] = source_value
@@ -63,7 +64,7 @@ class CoshedConfig(object):
             self._coshfile = os.path.abspath(coshfile)
 
         if os.path.isfile(self._coshfile):
-            with codecs.open(self._coshfile, "rb", 'utf-8') as src:
+            with codecs.open(self._coshfile, "rb", "utf-8") as src:
                 try:
                     self._data_sources["config"] = json.load(src)
                 except ValueError:
@@ -79,7 +80,7 @@ class CoshedConfig(object):
         self.write()
 
     def _acceptable_attr_name(self, attr_name):
-        if attr_name.startswith('_') or attr_name == 'coshfile':
+        if attr_name.startswith("_") or attr_name == "coshfile":
             return False
         if self._key_set:
             if attr_name not in self._key_set:
@@ -100,7 +101,7 @@ class CoshedConfig(object):
 
     def _populate(self):
         self._sources_log = []
-        source_order = ('args', 'environ', 'config', 'defaults')
+        source_order = ("args", "environ", "config", "defaults")
         key_set = set()
 
         if self._key_set:
@@ -121,8 +122,10 @@ class CoshedConfig(object):
                     value = self._data_sources[source_key][key]
                     setattr(self, key, value)
                     self._sources_log.append(
-                        '{:s}={!r} defined by {:s}'.format(key, value,
-                                                           source_key.upper()))
+                        "{:s}={!r} defined by {:s}".format(
+                            key, value, source_key.upper()
+                        )
+                    )
                     break
                 except KeyError:
                     pass
@@ -200,8 +203,10 @@ class CoshedConfig(object):
         items = list()
         for attr_name in list(self.keys()):
             items.append((attr_name, getattr(self, attr_name)))
-        return '<{:s} {:s}>'.format(self.__class__.__name__, ' '.join(
-            ['{:s}={!r}'.format(k, v) for k, v in sorted(items)]))
+        return "<{:s} {:s}>".format(
+            self.__class__.__name__,
+            " ".join(["{:s}={!r}".format(k, v) for k, v in sorted(items)]),
+        )
 
     def __repr__(self):
         return repr(self._data_dict())

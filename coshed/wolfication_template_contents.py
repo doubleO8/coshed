@@ -163,32 +163,23 @@ cfignore = """/contrib
 """
 
 spec_empty = {
-    "css": {
-        "lib": [
-            "css/lib_dummy.css"
-        ],
-        "app": [
-            "css/app_dummy.css"
-        ]
-    },
+    "css": {"lib": ["css/lib_dummy.css"], "app": ["css/app_dummy.css"]},
     "js": {
         "lib": [
             "js/lib_dummy.js",
         ],
-        "app": [
-            "js/app_dummy.js"
-        ]
-    }
+        "app": ["js/app_dummy.js"],
+    },
 }
 
 wolfication_specification = json.dumps(spec_empty, indent=2, sort_keys=True)
 
 TEMPLATES_CONTENT = {
-    '{templates_root}/nginx/site.conf.jinja2': site_conf,
-    '{templates_root}/uwsgi-emperor/app.ini.jinja2': app_ini,
-    '{templates_root}/skeletor.py': skeletor_py,
-    '{project_root}/requirements.txt': requirements_txt,
-    '{project_root}/.gitignore': gitignore,
-    '{project_root}/.cfignore': cfignore,
-    '{static_folder}/wolfication_specification.{app_name}.json': wolfication_specification,
+    "{templates_root}/nginx/site.conf.jinja2": site_conf,
+    "{templates_root}/uwsgi-emperor/app.ini.jinja2": app_ini,
+    "{templates_root}/skeletor.py": skeletor_py,
+    "{project_root}/requirements.txt": requirements_txt,
+    "{project_root}/.gitignore": gitignore,
+    "{project_root}/.cfignore": cfignore,
+    "{static_folder}/wolfication_specification.{app_name}.json": wolfication_specification,
 }

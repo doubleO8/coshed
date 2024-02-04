@@ -21,8 +21,10 @@ class CoshedWatcher(object):
         for (src, dst) in self.cosh_config_obj.scss_map:
             scss_call = '{binary} {args} "{src}":"{dst}"'.format(
                 binary=self.cosh_config_obj.scss,
-                args=' '.join(self.cosh_config_obj.scss_args),
-                src=src, dst=dst)
+                args=" ".join(self.cosh_config_obj.scss_args),
+                src=src,
+                dst=dst,
+            )
             self.log.info(" {!s}".format(scss_call))
             scss_rc = subprocess.call(scss_call, shell=True)
             self.log.info("# RC={!s}".format(scss_rc))
@@ -30,17 +32,17 @@ class CoshedWatcher(object):
     def call_js(self):
         if not self.cosh_config_obj.concat_js_sources:
             self.log.debug("Empty concat_js_sources!")
-        if self.cosh_config_obj.concat_js_compiler == 'closure':
+        if self.cosh_config_obj.concat_js_compiler == "closure":
             cat = CoshedConcatClosure(
                 self.cosh_config_obj.concat_js_sources,
                 self.cosh_config_obj.concat_js_trunk,
-                closure_binary=self.cosh_config_obj.closure_compiler
+                closure_binary=self.cosh_config_obj.closure_compiler,
             )
         else:
             cat = CoshedConcatMinifiedJS(
                 self.cosh_config_obj.concat_js_sources,
                 self.cosh_config_obj.concat_js_trunk,
-                css_html_js_minify=self.cosh_config_obj.css_html_js_minify
+                css_html_js_minify=self.cosh_config_obj.css_html_js_minify,
             )
         cat.write()
 
@@ -51,7 +53,7 @@ class CoshedWatcher(object):
             self.log.debug("no scripts_d attribute")
             return
 
-        glob_scripts = u'{:s}/*'.format(self.cosh_config_obj.scripts_d)
+        glob_scripts = "{:s}/*".format(self.cosh_config_obj.scripts_d)
 
         for s_filename in glob.glob(glob_scripts):
             if s_filename.endswith("~"):
@@ -61,8 +63,9 @@ class CoshedWatcher(object):
             if not os.access(s_filename, os.X_OK):
                 continue
 
-            command = u'{s_filename} {coshfile}'.format(
-                s_filename=s_filename, coshfile=self.cosh_config_obj.coshfile)
+            command = "{s_filename} {coshfile}".format(
+                s_filename=s_filename, coshfile=self.cosh_config_obj.coshfile
+            )
             self.log.info(" {!s}".format(command))
             command_rc = subprocess.call(command, shell=True)
             self.log.info("# RC={!s}".format(command_rc))
@@ -75,15 +78,17 @@ class CoshedWatcher(object):
                 func()
             except AttributeError:
                 self.log.warning(
-                    "Missing method {!r}. IGNORED.".format(func_name))
+                    "Missing method {!r}. IGNORED.".format(func_name)
+                )
 
     def watch(self):
         root = os.path.abspath(self.cosh_config_obj.watched_root)
         self.log.info("Watching {!s}".format(root))
         inotifywait_call = '{binary} {args} "{folder}"'.format(
             binary=self.cosh_config_obj.inotifywait,
-            args=' '.join(self.cosh_config_obj.inotifywait_args),
-            folder=root)
+            args=" ".join(self.cosh_config_obj.inotifywait_args),
+            folder=root,
+        )
 
         rc = subprocess.call(inotifywait_call, shell=True)
         while rc == 0:

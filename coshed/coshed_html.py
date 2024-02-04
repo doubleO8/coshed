@@ -20,7 +20,7 @@ def _n(path):
     Returns:
         unicode: path
     """
-    return os.path.normpath(to_unicode_or_bust(path)).replace(os.sep, '/')
+    return os.path.normpath(to_unicode_or_bust(path)).replace(os.sep, "/")
 
 
 def eval_html_sourcefile(item, root=None):
@@ -53,26 +53,28 @@ def eval_html_sourcefile(item, root=None):
         filename = item
 
     parent = os.path.abspath(os.path.dirname(filename))
-    resource_tags = ['script', 'link', 'img']
+    resource_tags = ["script", "link", "img"]
     with codecs.open(filename, "rb", "utf-8") as source:
-        soup = BeautifulSoup(source, 'html.parser')
+        soup = BeautifulSoup(source, "html.parser")
 
         for media_ref in soup.find_all(resource_tags):
-            if media_ref.get('src') and os.path.isfile(
-                    os.path.join(parent, media_ref.get('src'))):
+            if media_ref.get("src") and os.path.isfile(
+                os.path.join(parent, media_ref.get("src"))
+            ):
                 media_item = media_ref.get("src")
-            elif media_ref.get('href') and os.path.isfile(
-                    os.path.join(parent, media_ref.get('href'))):
+            elif media_ref.get("href") and os.path.isfile(
+                os.path.join(parent, media_ref.get("href"))
+            ):
                 media_item = media_ref.get("href")
             else:
                 continue
 
             item_abs = os.path.abspath(os.path.join(parent, media_item))
-            item_rel = item_abs[len(parent) + 1:]
+            item_rel = item_abs[len(parent) + 1 :]
             yield _n(os.path.join(parent, item_rel)), _n(item_rel)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     (FAILED, SUCCEEDED) = doctest.testmod()

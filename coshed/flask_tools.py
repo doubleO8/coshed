@@ -17,9 +17,10 @@ ROTATING_LOG_MAX_BYTES = 20000
 
 #: custom log formatter
 formatter = logging.Formatter(
-    fmt='%(asctime)s %(name)-16s %(levelname)-8s %(funcName)-15s '
-        '(#%(lineno)04d): %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S')
+    fmt="%(asctime)s %(name)-16s %(levelname)-8s %(funcName)-15s "
+    "(#%(lineno)04d): %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def rotating_app_log(flask_app_instance, app_name=None, **kwargs):
@@ -40,10 +41,12 @@ def rotating_app_log(flask_app_instance, app_name=None, **kwargs):
     if app_name is None:
         app_name = uuid.uuid4().hex
 
-    log_filename = '/tmp/{:s}-webapp.log'.format(app_name)
+    log_filename = "/tmp/{:s}-webapp.log".format(app_name)
     handler = RotatingFileHandler(
-        log_filename, maxBytes=kwargs.get("maxBytes", ROTATING_LOG_MAX_BYTES),
-        backupCount=kwargs.get("backupCount", ROTATING_LOG_BACKUP_COUNT))
+        log_filename,
+        maxBytes=kwargs.get("maxBytes", ROTATING_LOG_MAX_BYTES),
+        backupCount=kwargs.get("backupCount", ROTATING_LOG_BACKUP_COUNT),
+    )
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
     flask_app_instance.logger.addHandler(handler)
@@ -74,8 +77,8 @@ def wolfication(flask_app_instance, **kwargs):
     flask_app_instance.jinja_env.trim_blocks = True
     flask_app_instance.jinja_env.lstrip_blocks = True
     flask_app_instance.jinja_env.strip_trailing_newlines = True
-    flask_app_instance.config['SEND_FILE_MAX_AGE_DEFAULT'] = 24 * 3600 * 365
-    flask_app_instance.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+    flask_app_instance.config["SEND_FILE_MAX_AGE_DEFAULT"] = 24 * 3600 * 365
+    flask_app_instance.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
 
     if kwargs.get("config"):
         flask_app_instance.config.update(kwargs.get("config"))
@@ -92,10 +95,11 @@ def wolfication(flask_app_instance, **kwargs):
     if kwargs.get("app_name"):
         log_kwargs = dict(
             maxBytes=kwargs.get("maxBytes", ROTATING_LOG_MAX_BYTES),
-            backupCount=kwargs.get("backupCount", ROTATING_LOG_BACKUP_COUNT)
+            backupCount=kwargs.get("backupCount", ROTATING_LOG_BACKUP_COUNT),
         )
-        rotating_app_log(flask_app_instance,
-                         kwargs.get("app_name"), **log_kwargs)
+        rotating_app_log(
+            flask_app_instance, kwargs.get("app_name"), **log_kwargs
+        )
 
     return flask_app_instance
 
@@ -114,8 +118,9 @@ def serve_swagger_handler(swagger_root_path, app_name=None, overrides=None):
         Flask.Response: HTTP response object
     """
     try:
-        swagger_in = next_best_swagger_in_source(swagger_root_path,
-                                                 app_name=app_name)
+        swagger_in = next_best_swagger_in_source(
+            swagger_root_path, app_name=app_name
+        )
     except ValueError:
         abort(404)
 

@@ -6,7 +6,7 @@ import subprocess
 
 
 class SassyController(object):
-    __slots__ = ['log', 'item_tuples']
+    __slots__ = ["log", "item_tuples"]
 
     def __init__(self, *args, **kwargs):
         self.log = logging.getLogger(__name__)
@@ -16,7 +16,8 @@ class SassyController(object):
             self.add_item(args[0], args[1])
         else:
             self.add_item(
-                (kwargs.get("source_path"), kwargs.get("target_path")))
+                (kwargs.get("source_path"), kwargs.get("target_path"))
+            )
 
     def add_item(self, source_path, target_path):
         try:
@@ -24,21 +25,25 @@ class SassyController(object):
                 (os.path.normpath(source_path), os.path.normpath(target_path))
             )
         except AttributeError as aexc:
-            self.log.error("Bad source/target parameter: {!r}".format(
-                (source_path, target_path)))
+            self.log.error(
+                "Bad source/target parameter: {!r}".format(
+                    (source_path, target_path)
+                )
+            )
             raise
 
     def run(self, force=False):
         for source_path, target_path in self.item_tuples:
-            for source, target in self.sassy_items(source_path, target_path,
-                                                   force=force):
+            for source, target in self.sassy_items(
+                source_path, target_path, force=force
+            ):
                 args = [
-                    'sassc',
-                    '-t',
-                    'compressed',
-                    '--omit-map-comment',
+                    "sassc",
+                    "-t",
+                    "compressed",
+                    "--omit-map-comment",
                     source,
-                    target
+                    target,
                 ]
                 self.log.debug("Calling {!r}".format(args))
                 result = subprocess.check_call(args)
@@ -46,19 +51,17 @@ class SassyController(object):
 
     def sassy_items(self, source_path, target_path, force=False):
         for item in os.listdir(source_path):
-            if item.startswith('_'):
+            if item.startswith("_"):
                 continue
 
             (trunk, ext) = os.path.splitext(item)
 
-            if ext.lower() not in ('.scss', '.sass'):
+            if ext.lower() not in (".scss", ".sass"):
                 continue
 
-            source = os.path.normpath(
-                os.path.join(source_path, item)
-            )
+            source = os.path.normpath(os.path.join(source_path, item))
             target = os.path.normpath(
-                os.path.join(target_path, '{:s}.css'.format(trunk))
+                os.path.join(target_path, "{:s}.css".format(trunk))
             )
             do_yield = False
 
@@ -78,7 +81,7 @@ class SassyController(object):
                 yield source, target
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    sc = SassyController("./sassy", './static/css')
+    sc = SassyController("./sassy", "./static/css")
     sc.run()

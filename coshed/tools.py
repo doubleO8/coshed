@@ -18,7 +18,7 @@ def log_traceback(message, exception, uselog=None):
         message(str): message to be logged before trace log items
         exception(Exception): exception to be logged
         uselog(logging.Logger, optional): logger instance override
-        
+
     """
     if uselog is None:
         uselog = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def log_traceback(message, exception, uselog=None):
 
     for line in traceback.format_exception(e_type, e_value, e_traceback):
         for part in line.strip().split("\n"):
-            if part != '':
+            if part != "":
                 uselog.warning(part)
 
 
@@ -53,10 +53,10 @@ def dump_json(data, uselog=None, level=logging.INFO):
 def load_json(path):
     """
     Load JSON encoded file and return its contents.
-    
+
     Args:
         path(str): path
-    
+
     Returns:
         object: parsed content
 
@@ -78,12 +78,13 @@ def persist_json(data, path, indent=None, sort_keys=False):
         sort_keys (bool, optional): do sort keys
 
     """
-    with codecs.open(path, "wb", 'utf-8') as tgt:
+    with codecs.open(path, "wb", "utf-8") as tgt:
         json.dump(data, tgt, indent=indent, sort_keys=sort_keys)
 
 
-def next_best_specification_source(fallback, app_name=None, root_path=None,
-                                   trunk=None):
+def next_best_specification_source(
+    fallback, app_name=None, root_path=None, trunk=None
+):
     """
     Determine the best matching wolfication specification for *app_name*.
 
@@ -102,22 +103,20 @@ def next_best_specification_source(fallback, app_name=None, root_path=None,
         root_path = os.path.dirname(fallback)
 
     if trunk is None:
-        trunk = 'wolfication_specification'
+        trunk = "wolfication_specification"
 
     if app_name:
         candidates.append(
             os.path.join(
                 root_path,
-                '{trunk}.{app_name}.json'.format(
-                    app_name=app_name, trunk=trunk)
+                "{trunk}.{app_name}.json".format(
+                    app_name=app_name, trunk=trunk
+                ),
             )
         )
 
     candidates.append(
-        os.path.join(
-            root_path,
-            '{trunk}.json'.format(trunk=trunk)
-        )
+        os.path.join(root_path, "{trunk}.json".format(trunk=trunk))
     )
 
     for candy in candidates:
@@ -139,8 +138,9 @@ def next_best_asset_source(fallback, app_name=None, root_path=None):
     Returns:
         unicode: index path
     """
-    return next_best_specification_source(fallback, app_name=app_name,
-                                          root_path=root_path, trunk="index")
+    return next_best_specification_source(
+        fallback, app_name=app_name, root_path=root_path, trunk="index"
+    )
 
 
 def period_object(period):
@@ -157,22 +157,22 @@ def period_object(period):
         try:
             try:
                 return pendulum.Period(
-                    pendulum.parse(period['begin']),
-                    pendulum.parse(period['end']),
+                    pendulum.parse(period["begin"]),
+                    pendulum.parse(period["end"]),
                 )
             except KeyError:
                 return pendulum.Period(
-                    pendulum.parse(period['start']),  # allowing also 'start'
-                    pendulum.parse(period['end']),
+                    pendulum.parse(period["start"]),  # allowing also 'start'
+                    pendulum.parse(period["end"]),
                 )
         except KeyError:
             raise ValueError(
-                "Cannot make a period object out of {!r}".format(period))
+                "Cannot make a period object out of {!r}".format(period)
+            )
     elif isinstance(period, pendulum.Period):
         return period
 
-    raise ValueError(
-        "Cannot make a period object out of {!r}".format(period))
+    raise ValueError("Cannot make a period object out of {!r}".format(period))
 
 
 def period_json(period):
