@@ -1,6 +1,26 @@
+[tool.black]
+line-length = 79
+target-version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      __pycache__
+    | \.idea
+    | \.vscode
+    | build
+    | contrib
+    | dist
+    | doc
+    | iotta\.egg\-info
+    | \.?venv3?
+  )/
+)
+'''
+
 [tool.poetry]
 name = "coshed"
-version = "0.12.2"
+version = "0.12.3"
 description = "Project deployment and distribution tools for lazy developers"
 authors = ["doubleO8 <wb008@hdm-stuttgart.de>"]
 license = "GPL-2.0-only"
@@ -10,7 +30,7 @@ readme = "README.rst"
 python = ">=3.8,<3.12"
 beautifulsoup4 = "^4.6.0"
 requests = ">=2.13.0"
-pendulum = "^2"
+pendulum = "^2.1"
 future = ">=0.18.2"
 six = ">=1.13.0"
 Jinja2 = "^2.10.3"
@@ -21,7 +41,7 @@ cachelib = ">=0.1"
 transitions = "^0.8.2"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.1.1"
+black = "^22.10.0"
 
 [build-system]
 requires = ["poetry-core"]
